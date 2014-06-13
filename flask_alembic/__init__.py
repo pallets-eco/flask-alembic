@@ -1,20 +1,15 @@
 from __future__ import absolute_import
-from collections import namedtuple
+import os
 from alembic.config import Config
 from alembic.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
 from flask import current_app
-
-
-PreparedContext = namedtuple(
-    'PreparedContext',
-    ['config', 'script_directory', 'environment_context', 'migration_context']
-)
+from werkzeug.local import LocalProxy
 
 
 class Alembic(object):
     def __init__(self, app=None):
-        self._prepare_cache = {}
+        self._cache = {}
 
         if app is not None:
             self.init_app(app)
@@ -22,76 +17,89 @@ class Alembic(object):
     def init_app(self, app):
         app.extensions['alembic'] = self
 
-        app.config.setdefault('ALEMBIC', {})
+        config = app.config.setdefault('ALEMBIC', {})
+        config.setdefault('script_location', 'migrations')
         app.config.setdefault('ALEMBIC_CONTEXT', {})
 
-        self._prepare_cache[app] = prepare_cache = {}
+        self._cache[app] = {}
 
-        def clear_prepare_cache():
-            prepare_cache.clear()
+        app.teardown_appcontext(self._clear_cache)
 
-        app.teardown_appcontext(clear_prepare_cache)
+    def _clear_cache(self, exc=None):
+        cache = self._get_cache()
 
-    def make_config(self):
-        c = Config()
+        if 'context' in cache:
+            cache['context'].connection.close()
 
-        for key, value in current_app.config['ALEMBIC'].iteritems():
-            c.set_main_option(key, value)
+        cache.clear()
 
-        return c
+    def _get_cache(self):
+        return self._cache[current_app._get_current_object()]
 
-    def make_script_directory(self, config):
-        sd = ScriptDirectory.from_config(config)
-        sd.versions = sd.dir
+    @property
+    def config(self):
+        cache = self._get_cache()
 
-        return sd
+        if 'config' not in cache:
+            cache['config'] = c = Config()
 
-    def make_environment_context(self, config, script_directory):
-        return EnvironmentContext(config, script_directory)
+            for key, value in current_app.config['ALEMBIC'].iteritems():
+                if key == 'script_location' and not os.path.isabs(value) and ':' not in value:
+                    value = os.path.join(current_app.root_path, value)
 
-    def make_migration_context(self, environment_context, fn):
+                c.set_main_option(key, value)
+
+        return cache['config']
+
+    @property
+    def script(self):
+        cache = self._get_cache()
+
+        if 'script' not in cache:
+            cache['script'] = sd = ScriptDirectory.from_config(self.config)
+            sd.versions = sd.dir
+
+        return cache['script']
+
+    @property
+    def env(self):
+        cache = self._get_cache()
+
+        if 'env' not in cache:
+            cache['env'] = EnvironmentContext(self.config, self.script)
+
+        return cache['env']
+
+    @property
+    def simple_context(self):
+        cache = self._get_cache()
+
+        if 'context' not in cache:
+            db = current_app.extensions['sqlalchemy'].db
+            conn = db.engine.connect()
+
+            env = self.env
+            env.configure(connection=conn, target_metadata=db.metadata)
+            cache['context'] = env.get_context()
+
+        return cache['context']
+
+    def run_migrations(self, fn, **kwargs):
         db = current_app.extensions['sqlalchemy'].db
-        connection = db.engine.connect()
+        conn = db.engine.connect()
 
-        context = current_app.config['ALEMBIC_CONTEXT'].copy()
-        context['fn'] = fn
-
-        environment_context.configure(connection=connection, target_metadata=db.metadata, **context)
-
-        return environment_context.get_context()
-
-    def prepare(self, fn=None):
-        cache = self._prepare_cache[current_app._get_current_object()]
-
-        if fn in cache:
-            return cache[fn]
-
-        config = self.make_config()
-        script_directory = self.make_script_directory(config)
-        environment_context = self.make_environment_context(config, script_directory)
-        migration_context = self.make_migration_context(environment_context, fn)
-
-        context = PreparedContext(config, script_directory, environment_context, migration_context)
-        cache[fn] = context
-
-        return context
-
-    def run(self, context=None, fn=None):
-        if context is None or fn is not None:
-            context = self.prepare(fn)
-
-        migration_context = context.migration_context
+        env = EnvironmentContext(self.config, self.script)
+        env.configure(connection=conn, target_metadata=db.metadata, fn=fn)
 
         try:
-            with migration_context.begin_transaction():
-                migration_context.run_migrations()
+            with env.begin_transaction():
+                env.run_migrations(**kwargs)
         finally:
-            migration_context.connection.close()
+            conn.close()
 
 
-def prepare(fn=None):
-    return current_app.extensions['alembic'].prepare(fn)
+current_alembic = LocalProxy(lambda: current_app.extensions['alembic'])
 
 
-def run(fn=None):
-    return current_app.extensions['alembic'].run(fn=fn)
+def run_migrations(fn, **kwargs):
+    current_alembic.run_migrations(fn, **kwargs)
