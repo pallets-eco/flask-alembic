@@ -71,7 +71,7 @@ class Alembic(object):
         return cache['env']
 
     @property
-    def simple_context(self):
+    def context(self):
         cache = self._get_cache()
 
         if 'context' not in cache:
@@ -88,7 +88,7 @@ class Alembic(object):
         db = current_app.extensions['sqlalchemy'].db
         conn = db.engine.connect()
 
-        env = EnvironmentContext(self.config, self.script)
+        env = self.env
         env.configure(connection=conn, target_metadata=db.metadata, fn=fn)
 
         try:
@@ -99,7 +99,3 @@ class Alembic(object):
 
 
 current_alembic = LocalProxy(lambda: current_app.extensions['alembic'])
-
-
-def run_migrations(fn, **kwargs):
-    current_alembic.run_migrations(fn, **kwargs)
