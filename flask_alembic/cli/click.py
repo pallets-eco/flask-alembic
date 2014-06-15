@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import click
-from flask_alembic import command
+from flask_alembic.cli import base
 
 
 @click.group()
@@ -14,7 +14,7 @@ def cli():
 def mkdir():
     """Make migration directory."""
 
-    command.mkdir()
+    base.mkdir()
 
 
 @cli.command()
@@ -22,7 +22,7 @@ def mkdir():
 def current(verbose):
     """Show current revision."""
 
-    command.current(verbose)
+    base.current(verbose)
 
 
 @cli.command()
@@ -30,7 +30,7 @@ def current(verbose):
 def stamp(revision):
     """Set current revision."""
 
-    command.stamp(revision)
+    base.stamp(revision)
 
 
 @cli.command()
@@ -40,14 +40,14 @@ def stamp(revision):
 def log(start, end, verbose):
     """Show revision log."""
 
-    command.log(start, end, verbose)
+    base.log(start, end, verbose)
 
 
 @cli.command()
 def branches():
     """Show branches in upgrade path."""
 
-    command.branches()
+    base.branches()
 
 
 @cli.command()
@@ -55,7 +55,7 @@ def branches():
 def upgrade(target):
     """Run upgrade migrations."""
 
-    command.upgrade(target)
+    base.upgrade(target)
 
 
 @cli.command()
@@ -63,7 +63,7 @@ def upgrade(target):
 def downgrade(target):
     """Run downgrade migrations."""
 
-    command.downgrade(target)
+    base.downgrade(target)
 
 
 @cli.command()
@@ -72,4 +72,4 @@ def downgrade(target):
 def revision(message, empty):
     """Create new migration."""
 
-    command.revision(message, empty)
+    base.revision(message, empty)
