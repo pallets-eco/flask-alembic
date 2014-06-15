@@ -140,12 +140,12 @@ class Alembic(object):
         context = self.context
         context._update_current_rev(context.get_current_revision(), revision)
 
-    def history(self, revision_range=None):
-        if revision_range is not None:
-            if revision_range.count(':') != 1:
+    def history(self, range=None):
+        if range is not None:
+            if range.count(':') != 1:
                 raise util.CommandError('History range requires [start]:[end], [start]:, or :[end]')
 
-            start, end = revision_range.strip().split(':')
+            start, end = range.strip().split(':')
 
             if not start:
                 start = 'base'
@@ -166,13 +166,13 @@ class Alembic(object):
 
     def upgrade(self, target='head'):
         def do_upgrade(revision, context):
-            return self.script._upgrade_revs(target, revision)
+            return self.script._upgrade_revs(str(target), revision)
 
         self.run_migrations(do_upgrade)
 
-    def downgrade(self, target='-1'):
+    def downgrade(self, target=-1):
         def do_downgrade(revision, context):
-            return self.script._downgrade_revs(target, revision)
+            return self.script._downgrade_revs(str(target), revision)
 
         self.run_migrations(do_downgrade)
 
