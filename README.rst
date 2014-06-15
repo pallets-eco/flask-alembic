@@ -53,7 +53,6 @@ TODO
 
 *   See if ``db.session`` can be used rather than establishing new connections.
 *   Support multiple databases though Flask-SQLAlchemy's binds.
-*   Provide commands with Click, the new Flask CLI.
 *   Support offline migrations.
 
 .. _Flask: http://flask.pocoo.org/
