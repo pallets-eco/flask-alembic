@@ -6,11 +6,11 @@ This `Flask`_ extension provides a configurable `Alembic`_ migration environment
 Installation
 ------------
 
-Install releases from PyPI::
+Install releases from `PyPI`_::
 
     pip install Flask-Alembic
 
-Install latest code from BitBucket::
+Install latest code from `BitBucket`_::
 
     pip install https://bitbucket.org/davidism/flask-alembic
 
@@ -57,4 +57,6 @@ TODO
 .. _Flask: http://flask.pocoo.org/
 .. _Flask-SQLAlchemy: https://pythonhosted.org/Flask-SQLAlchemy/
 .. _Alembic: https://alembic.readthedocs.org/en/latest/
+.. _PyPI: https://pypi.python.org/pypi/Flask-Alembic
+.. _BitBucket: https://bitbucket.org/davidism/flask-alembic
 .. _Flask-Migrate: https://flask-migrate.readthedocs.org/en/latest/
