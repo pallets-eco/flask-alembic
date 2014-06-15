@@ -40,7 +40,7 @@ Differences from Alembic core
 *   Configuration is taken from Flask instead of alembic.ini.
 *   The migrations are stored directly in the migrations folder instead of the versions folder.
 *   The extension provides the migration environment instead of env.py.
-*   Does not support offline migrations.
+*   Does not (currently) support offline migrations.
 
 
 Differences from Flask-Migrate
