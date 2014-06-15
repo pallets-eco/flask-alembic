@@ -2,6 +2,7 @@ syntax: glob
 
 .idea
 *.pyc
+docs/_build
 build
 dist
 *.egg*
