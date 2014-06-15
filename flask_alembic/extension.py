@@ -155,12 +155,14 @@ class Alembic(object):
             if not start:
                 start = 'base'
             elif start == 'current':
-                start = self.current().revision
+                r = self.current()
+                start = r.revision if r is not None else None
 
             if not end:
                 end = 'head'
             elif end == 'current':
-                end = self.current().revision
+                r = self.current()
+                end = r.revision if r is not None else None
         else:
             start, end = 'base', 'head'
 
