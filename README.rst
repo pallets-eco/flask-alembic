@@ -40,6 +40,7 @@ Differences from Alembic core
 *   Configuration is taken from Flask instead of alembic.ini.
 *   The migrations are stored directly in the migrations folder instead of the versions folder.
 *   The extension provides the migration environment instead of env.py.
+*   Does not support offline migrations.
 
 
 Differences from Flask-Migrate
@@ -53,6 +54,7 @@ TODO
 *   See if ``db.session`` can be used rather than establishing new connections.
 *   Support multiple databases though Flask-SQLAlchemy's binds.
 *   Provide commands with Click, the new Flask CLI.
+*   Support offline migrations.
 
 .. _Flask: http://flask.pocoo.org/
 .. _Flask-SQLAlchemy: https://pythonhosted.org/Flask-SQLAlchemy/
