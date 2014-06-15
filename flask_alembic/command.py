@@ -33,13 +33,13 @@ def stamp(revision):
     get_alembic().stamp(revision)
 
 
-def history(range=None, verbose=False):
+def log(start='base', end='head', verbose=False):
     """Show the revision upgrade path."""
 
     a = get_alembic()
     print_stdout = a.config.print_stdout
 
-    for revision in a.history(range):
+    for revision in a.log(start, end):
         if verbose:
             print_stdout(revision.log_entry)
         else:
@@ -47,6 +47,8 @@ def history(range=None, verbose=False):
 
 
 def branches():
+    """Show any branches that must be resolved."""
+
     a = get_alembic()
     print_stdout = a.config.print_stdout
     script = a.script

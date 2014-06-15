@@ -145,26 +145,22 @@ class Alembic(object):
 
         context._update_current_rev(context.get_current_revision(), dest)
 
-    def history(self, range=None):
-        if range is not None:
-            if range.count(':') != 1:
-                raise util.CommandError('History range requires [start]:[end], [start]:, or :[end]')
-
-            start, end = range.strip().split(':')
-
-            if not start:
-                start = 'base'
-            elif start == 'current':
-                r = self.current()
-                start = r.revision if r is not None else None
-
-            if not end:
-                end = 'head'
-            elif end == 'current':
-                r = self.current()
-                end = r.revision if r is not None else None
+    def log(self, start='base', end='head'):
+        if start is None:
+            start = 'base'
+        elif start == 'current':
+            r = self.current()
+            start = r.revision if r else None
         else:
-            start, end = 'base', 'head'
+            start = str(start)
+
+        if end is None:
+            end = 'head'
+        elif end == 'current':
+            r = self.current()
+            end = r.revision if r else None
+        else:
+            end = str(end)
 
         return list(self.script.walk_revisions(start, end))
 
