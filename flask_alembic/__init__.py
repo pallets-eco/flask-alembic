@@ -117,13 +117,18 @@ class Alembic(object):
         template_src = os.path.join(config.get_template_directory(), 'generic', 'script.py.mako')
         template_dest = os.path.join(script_dir, 'script.py.mako')
 
-        if not ignore_existing and os.access(script_dir, os.F_OK):
+        if os.access(script_dir, os.F_OK):
+            if ignore_existing:
+                return False
+
             raise util.CommandError('Directory {0} already exists'.format(script_dir))
 
         if not os.access(template_src, os.F_OK):
             raise util.CommandError('Template {0} does not exist'.format(template_src))
 
+        os.makedirs(script_dir)
         shutil.copy(template_src, template_dest)
+        return True
 
     def current(self):
         script = self.script
