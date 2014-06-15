@@ -136,9 +136,10 @@ class Alembic(object):
 
         return script.get_revision(context.get_current_revision())
 
-    def stamp(self, revision):
+    def stamp(self, revision='head'):
+        script = self.script
         context = self.context
-        context._update_current_rev(context.get_current_revision(), revision)
+        context._update_current_rev(context.get_current_revision(), script.as_revision_number(revision))
 
     def history(self, range=None):
         if range is not None:
