@@ -34,14 +34,18 @@ You've created a Flask application and some models with Flask-SQLAlchemy.  Now s
     # Access the internals
     environment_context = alembic.env
 
-FAQ
-----
+Differences from Alembic core
+-----------------------------
 
-How does Flask-Alembic differ from Alembic core?
-    `Alembic`_ uses alembic.ini for configuration, and env.py for setting up a migration environment.  Flask-Alembic takes advantage of Flask's configuration to remove alembic.ini.  It removes env.py and provides the migration environment directly, which allows access to all the Alembic internals within the Flask application.
+*   Configuration is taken from Flask instead of alembic.ini.
+*   The migrations are stored directly in the migrations folder instead of the versions folder.
+*   The extension provides the migration environment instead of env.py.
 
-How does Flask-Alembic differ from Flask-Migrate?
-    `Flask-Migrate`_ is a simple wrapper around the existing Alembic commands.  It associates the Flask-SQLAlchemy database with Alembic, and wraps the Alembic commands with Flask-Script.  It still requires the standard Alembic file structure, does not integrate with Flask configuration, and does not expose the Alembic internals.
+
+Differences from Flask-Migrate
+------------------------------
+
+`Flask-Migrate`_ is a simple wrapper around the existing Alembic commands.  It associates the Flask-SQLAlchemy database with Alembic, and wraps the Alembic commands with Flask-Script.  It still requires the standard Alembic file structure, does not integrate with Flask configuration, and does not expose the Alembic internals.
 
 TODO
 ----
