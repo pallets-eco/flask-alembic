@@ -23,11 +23,11 @@ class Alembic(object):
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app, makedir=None):
+    def init_app(self, app, run_mkdir=None):
         """Register this extension on an app.  Will automatically set up migration directory by default.
 
         :param app: app to register
-        :param makedir: whether to run :meth:`mkdir`
+        :param run_mkdir: whether to run :meth:`mkdir`
         """
         app.extensions['alembic'] = self
 
@@ -39,7 +39,7 @@ class Alembic(object):
 
         app.teardown_appcontext(self._clear_cache)
 
-        if makedir or self.run_mkdir:
+        if run_mkdir or self.run_mkdir:
             self.mkdir(app)
 
     def _clear_cache(self, exc=None):
@@ -126,7 +126,10 @@ class Alembic(object):
             conn = db.engine.connect()
 
             env = self.env
-            env.configure(connection=conn, target_metadata=db.metadata)
+            env.configure(
+                connection=conn, target_metadata=db.metadata,
+                **current_app.config['ALEMBIC_CONTEXT']
+            )
             cache['context'] = env.get_context()
 
         return cache['context']
@@ -283,3 +286,6 @@ class Alembic(object):
             self.run_migrations(do_revision)
 
         return script.generate_revision(util.rev_id(), message, True, **template_args)
+
+    #TODO: expose operations context
+    #TODO: expose autogenerate.compare_diff function

@@ -42,7 +42,6 @@ Differences from Alembic core
 *   The extension provides the migration environment instead of env.py.
 *   Does not (currently) support offline migrations.
 
-
 Differences from Flask-Migrate
 ------------------------------
 
