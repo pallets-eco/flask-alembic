@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Alembic',
-    version='0.0.0',
+    version='1.0.0',
     description='Flask extension to integrate Alembic migrations',
     author='David Lord',
     author_email='davidism@gmail.com',
@@ -11,7 +11,7 @@ setup(
     license='BSD',
     zip_safe=False,
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Flask',
         'Intended Audience :: Developers',
