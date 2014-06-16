@@ -1,8 +1,9 @@
-"""Integration with Click. ::
+"""Integration with Click::
 
     from flask_alembic.cli.click import cli as alembic_cli
     app.cli.add_command(alembic_cli, 'db')
 
+\\
 """
 from __future__ import absolute_import
 import click

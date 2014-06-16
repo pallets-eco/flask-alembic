@@ -1,8 +1,9 @@
-"""Integration with Flask-Script. ::
+"""Integration with Flask-Script::
 
     from flask_alembic.cli.script import manager as alembic_manager
     manager.add_command('db', alembic_manager)
 
+\\
 """
 from flask_script import Manager
 from flask_alembic.cli import base
