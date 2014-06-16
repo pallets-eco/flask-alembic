@@ -59,10 +59,10 @@ The ``alembic`` instance provides an interface between the current app and Alemb
 
 You can also get at the Alembic internals that enable these commands.  See the `Alembic API docs <api_>`_ for more information. ::
 
-    alembic.config.get_main_option('script_location')
     alembic.script.get_revision('head')  # locate a revision by name
-    alembic.env  # not really useful on it's own
     alembic.context.get_current_revision()  # could compare this to the 'head' revision above to see if upgrades are needed
+    alembic.op.drop_column('my_table', 'my_column')  # probably don't want to do this outside a revision, but it'll work
+    alembic.compare_metadata()  # see that that column you just dropped will be added back next revision
 
 .. _api: https://alembic.readthedocs.org/en/latest/api.html
 

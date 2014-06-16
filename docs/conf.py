@@ -182,10 +182,10 @@ html_static_path = ['_static']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'https://docs.python.org/': None,
-    'http://flask.pocoo.org/docs/': None,
-    'https://docs.sqlalchemy.org/en/latest/': None,
+    # 'https://docs.python.org/': None,
+    # 'http://flask.pocoo.org/docs/': None,
+    # 'https://docs.sqlalchemy.org/en/latest/': None,
     'https://alembic.readthedocs.org/en/latest/': None,
     'http://flask-script.readthedocs.org/en/latest/': None,
-    'http://click.pocoo.org/': None,
+    # 'http://click.pocoo.org/': None,
 }

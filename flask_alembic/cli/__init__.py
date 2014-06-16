@@ -10,4 +10,6 @@ Provide integration with cli libraries.
 
 .. automodule:: flask_alembic.cli.base
     :members:
+    :member-order: bysource
+    :exclude-members: get_alembic
 """

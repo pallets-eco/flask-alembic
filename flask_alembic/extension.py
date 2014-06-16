@@ -93,12 +93,12 @@ class Alembic(object):
 
     @property
     def config(self):
-        """Get the Alembic :class:`Config` for the current app."""
+        """Get the Alembic :class:`~alembic.config.Config` for the current app."""
         return self._get_config()
 
     @property
     def script(self):
-        """Get the Alembic :class:`ScriptDirectory` for the current app."""
+        """Get the Alembic :class:`~alembic.script.ScriptDirectory` for the current app."""
         cache = self._get_cache()
 
         if 'script' not in cache:
@@ -109,7 +109,7 @@ class Alembic(object):
 
     @property
     def env(self):
-        """Get the Alembic :class:`EnvironmentContext` for the current app."""
+        """Get the Alembic :class:`~alembic.environment.EnvironmentContext` for the current app."""
         cache = self._get_cache()
 
         if 'env' not in cache:
