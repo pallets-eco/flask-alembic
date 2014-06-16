@@ -4,6 +4,7 @@ import shutil
 from alembic import autogenerate, util
 from alembic.config import Config
 from alembic.environment import EnvironmentContext
+from alembic.operations import Operations
 from alembic.script import ScriptDirectory
 from flask import current_app
 
@@ -133,6 +134,16 @@ class Alembic(object):
             cache['context'] = env.get_context()
 
         return cache['context']
+
+    @property
+    def op(self):
+        """Get the Alembic :class:`~alembic.operations.Operations` context for the current app."""
+        cache = self._get_cache()
+
+        if 'op' not in cache:
+            cache['op'] = Operations(self.context)
+
+        return cache['op']
 
     def run_migrations(self, fn, **kwargs):
         """Configure an Alembic :class:`~alembic.migration.MigrationContext` to run migrations for the given function.
@@ -287,5 +298,8 @@ class Alembic(object):
 
         return script.generate_revision(util.rev_id(), message, True, **template_args)
 
-    #TODO: expose operations context
-    #TODO: expose autogenerate.compare_diff function
+    def compare_metadata(self):
+        """Generate a list of operations that would be present in a new revision."""
+
+        db = self._get_app().extensions['sqlalchemy'].db
+        return autogenerate.compare_metadata(self.context, db.metadata)
