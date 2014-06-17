@@ -20,7 +20,10 @@ setup(
         'Programming Language :: Python',
         'Topic :: Database :: Front-Ends',
     ],
-    packages=['flask_alembic'],
+    packages=[
+        'flask_alembic',
+        'flask_alembic.cli'
+    ],
     install_requires=[
         'alembic>=0.6.5',
         'Flask>=0.10.1',
