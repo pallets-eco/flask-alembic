@@ -7,6 +7,7 @@ from alembic.environment import EnvironmentContext
 from alembic.operations import Operations
 from alembic.script import ScriptDirectory
 from flask import current_app
+from flask._compat import iteritems
 
 
 class Alembic(object):
@@ -83,7 +84,7 @@ class Alembic(object):
         if 'config' not in cache:
             cache['config'] = c = Config()
 
-            for key, value in app.config['ALEMBIC'].iteritems():
+            for key, value in iteritems(app.config['ALEMBIC']):
                 if key == 'script_location' and not os.path.isabs(value) and ':' not in value:
                     value = os.path.join(app.root_path, value)
 
