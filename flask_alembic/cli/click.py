@@ -7,10 +7,11 @@
 """
 from __future__ import absolute_import
 import click
+from flask.cli import AppGroup
 from flask_alembic.cli import base
 
 
-@click.group()
+@click.command(cls=AppGroup)
 def cli():
     """Perform database migrations."""
     pass
