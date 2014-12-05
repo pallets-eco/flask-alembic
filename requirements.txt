@@ -1,0 +1,4 @@
+alembic>=0.7
+Flask>=0.10
+Flask-SQLAlchemy>=2
+SQLAlchemy>=0.9

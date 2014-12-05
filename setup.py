@@ -1,15 +1,25 @@
 #!/usr/bin/env python
-from setuptools import setup
+import os
+import re
+from setuptools import setup, find_packages
+
+with open(os.path.join(os.path.dirname(__file__), 'flask_alembic', '__init__.py')) as f:
+    version = re.search(r"__version__ = '(.*)'", f.read()).group(1)
+
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
 
 setup(
     name='Flask-Alembic',
-    version='1.0.2',
-    description='Flask extension to integrate Alembic migrations',
-    author='David Lord',
-    author_email='davidism@gmail.com',
+    version=version,
+    packages=find_packages(),
+    include_package_data=True,
+    zip_safe=False,
     url='https://bitbucket.org/davidism/flask-alembic',
     license='BSD',
-    zip_safe=False,
+    author='David Lord',
+    author_email='davidism@gmail.com',
+    description='Flask extension to integrate Alembic migrations',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -20,14 +30,5 @@ setup(
         'Programming Language :: Python',
         'Topic :: Database :: Front-Ends',
     ],
-    packages=[
-        'flask_alembic',
-        'flask_alembic.cli'
-    ],
-    install_requires=[
-        'alembic>=0.6.5',
-        'Flask>=0.10.1',
-        'Flask-SQLAlchemy>=1.0',
-        'SQLAlchemy>=0.9.4',
-    ],
+    install_requires=requirements,
 )
