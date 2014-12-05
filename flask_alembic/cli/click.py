@@ -60,7 +60,7 @@ def upgrade(target):
 
 
 @cli.command()
-@click.argument('target', default='-1')
+@click.argument('target', default='1')
 def downgrade(target):
     """Run downgrade migrations."""
     base.downgrade(target)

@@ -18,6 +18,7 @@ class Alembic(object):
     :param app: call :meth:`init_app` on this app
     :param run_mkdir: whether to run :meth:`mkdir` during :meth:`init_app`
     """
+
     def __init__(self, app=None, run_mkdir=True):
         self._cache = {}
         self.run_mkdir = run_mkdir
@@ -31,24 +32,31 @@ class Alembic(object):
         :param app: app to register
         :param run_mkdir: whether to run :meth:`mkdir`
         """
+
         app.extensions['alembic'] = self
 
         config = app.config.setdefault('ALEMBIC', {})
         config.setdefault('script_location', 'migrations')
+        config.setdefault('version_locations', [])
         app.config.setdefault('ALEMBIC_CONTEXT', {})
 
         self._cache[app] = {}
 
         app.teardown_appcontext(self._clear_cache)
 
-        if run_mkdir or self.run_mkdir:
-            self.mkdir(app)
+        if run_mkdir or (run_mkdir is None and self.run_mkdir):
+            with app.app_context():
+                self.mkdir()
 
     def _clear_cache(self, exc=None):
-        """Clear the cached objects for the current app.
+        """Clear the cached objects for the given app.
+
+        This is called automatically during app context teardown.
 
         :param exc: exception from teardown handler
+        :param app: if None, use current_app
         """
+
         cache = self._get_cache()
 
         if 'context' in cache:
@@ -56,61 +64,61 @@ class Alembic(object):
 
         cache.clear()
 
-    def _get_app(self, app=None):
-        """Get an app instance to operate on.
+    def _get_cache(self):
+        """Get the cache for the current app."""
 
-        :param app: if None, use current_app
-        """
-        return app or current_app._get_current_object()
+        return self._cache[current_app._get_current_object()]
 
-    def _get_cache(self, app=None):
-        """Get the cache for the given app.
+    @property
+    def config(self):
+        """Get the Alembic :class:`~alembic.config.Config` for the current app."""
 
-        :param app: if None, use current_app
-        """
-        return self._cache[self._get_app(app)]
-
-    def _get_config(self, app=None):
-        """Get the Alembic :meth:`Config`.
-
-        Is exposed as a method instead of a property so that :meth:`mkdir` can be called without an app context during :meth:`init_app`.
-
-        :param app: get config from this app, or current_app
-        :return: Alembic config instance
-        """
-        app = self._get_app(app)
-        cache = self._get_cache(app)
+        cache = self._get_cache()
 
         if 'config' not in cache:
             cache['config'] = c = Config()
 
-            for key, value in iteritems(app.config['ALEMBIC']):
-                if key == 'script_location' and not os.path.isabs(value) and ':' not in value:
-                    value = os.path.join(app.root_path, value)
+            script_location = current_app.config['ALEMBIC']['script_location']
+
+            if not os.path.isabs(script_location) and ':' not in script_location:
+                script_location = os.path.join(current_app.root_path, script_location)
+
+            version_locations = [script_location]
+
+            for item in current_app.config['ALEMBIC']['version_locations']:
+                version_location = item if isinstance(item, str) else item[1]
+
+                if not os.path.isabs(version_location) and ':' not in version_location:
+                    version_location = os.path.join(current_app.root_path, version_location)
+
+                version_locations.append(version_location)
+
+            c.set_main_option('script_location', script_location)
+            c.set_main_option('version_locations', ','.join(version_locations))
+
+            for key, value in iteritems(current_app.config['ALEMBIC']):
+                if key in {'script_location', 'version_locations'}:
+                    continue
 
                 c.set_main_option(key, value)
 
         return cache['config']
 
     @property
-    def config(self):
-        """Get the Alembic :class:`~alembic.config.Config` for the current app."""
-        return self._get_config()
-
-    @property
     def script(self):
         """Get the Alembic :class:`~alembic.script.ScriptDirectory` for the current app."""
+
         cache = self._get_cache()
 
         if 'script' not in cache:
-            cache['script'] = sd = ScriptDirectory.from_config(self.config)
-            sd.versions = sd.dir
+            cache['script'] = ScriptDirectory.from_config(self.config)
 
         return cache['script']
 
     @property
     def env(self):
         """Get the Alembic :class:`~alembic.environment.EnvironmentContext` for the current app."""
+
         cache = self._get_cache()
 
         if 'env' not in cache:
@@ -121,6 +129,7 @@ class Alembic(object):
     @property
     def context(self):
         """Get the Alembic :class:`~alembic.migration.MigrationContext` for the current app."""
+
         cache = self._get_cache()
 
         if 'context' not in cache:
@@ -139,6 +148,7 @@ class Alembic(object):
     @property
     def op(self):
         """Get the Alembic :class:`~alembic.operations.Operations` context for the current app."""
+
         cache = self._get_cache()
 
         if 'op' not in cache:
@@ -154,6 +164,7 @@ class Alembic(object):
         :param fn: use this function to control what migrations are run
         :param kwargs: extra arguments passed to revision function
         """
+
         db = current_app.extensions['sqlalchemy'].db
         conn = db.engine.connect()
 
@@ -169,90 +180,101 @@ class Alembic(object):
         finally:
             conn.close()
 
-    def mkdir(self, app=None, ignore_existing=True):
-        """Create the migration directory and script template.
+    def mkdir(self):
+        """Create the script directory and template."""
 
-        :param app: used during :meth:`init_app` to operate without an app context
-        :param ignore_existing: don't raise an error if directory already exists
-        :return: True if directory was created
-        """
-        config = self._get_config(app)
-        script_dir = config.get_main_option('script_location')
-        template_src = os.path.join(config.get_template_directory(), 'generic', 'script.py.mako')
+        script_dir = self.config.get_main_option('script_location')
+        template_src = os.path.join(self.config.get_template_directory(), 'generic', 'script.py.mako')
         template_dest = os.path.join(script_dir, 'script.py.mako')
-
-        if os.access(script_dir, os.F_OK):
-            if ignore_existing:
-                return False
-
-            raise util.CommandError('Directory {0} already exists'.format(script_dir))
 
         if not os.access(template_src, os.F_OK):
             raise util.CommandError('Template {0} does not exist'.format(template_src))
 
-        os.makedirs(script_dir)
-        shutil.copy(template_src, template_dest)
-        return True
+        if not os.access(script_dir, os.F_OK):
+            os.makedirs(script_dir)
+
+        if not os.access(template_dest, os.F_OK):
+            shutil.copy(template_src, template_dest)
+
+        for version_location in self.script._version_locations:
+            if not os.access(version_location, os.F_OK):
+                os.makedirs(version_location)
 
     def current(self):
-        """Get the current database revision."""
-        script = self.script
-        context = self.context
+        """Get the list of current revisions."""
 
-        return script.get_revision(context.get_current_revision())
+        return self.script.get_revisions(self.context.get_current_heads())
 
-    def stamp(self, revision='head'):
-        """Set the current database revision without running migrations.
+    def heads(self, resolve_dependencies=False):
+        """Get the list of revisions that have no child revisions.
 
-        :param revision: revision to set to, default 'head'
+        :param resolve_dependencies: treat dependencies as down revisions
         """
-        script = self.script
-        context = self.context
 
-        dest = script.get_revision(revision)
-        dest = dest and dest.revision
+        if resolve_dependencies:
+            return self.script.get_revisions('heads')
 
-        context._update_current_rev(context.get_current_revision(), dest)
+        return self.script.get_revisions(self.script.get_heads())
 
-    def log(self, start='base', end='head'):
-        """Get a list of revisions in the order they will run.
+    def branches(self):
+        """Get the list of revisions that have more than one next revision."""
+
+        return [revision for revision in self.script.walk_revisions() if revision.is_branch_point]
+
+    def log(self, start=None, end=None):
+        """Get the list of revisions in the order they will run.
 
         :param start: only get since this revision
         :param end: only get until this revision
-        :return: list of revisions in order
         """
+
         if start is None:
             start = 'base'
         elif start == 'current':
-            r = self.current()
-            start = r.revision if r else None
+            start = [r.revision for r in self.current()]
         else:
-            start = str(start)
+            start = getattr(start, 'revision', start)
 
         if end is None:
-            end = 'head'
+            end = 'heads'
         elif end == 'current':
-            r = self.current()
-            end = r.revision if r else None
+            end = [r.revision for r in self.current()]
         else:
-            end = str(end)
+            end = getattr(end, 'revision', end)
 
         return list(self.script.walk_revisions(start, end))
 
-    def branches(self):
-        """Get a list of revisions that have more than one next revision.
+    def stamp(self, target=None):
+        """Set the current database revision without running migrations.
 
-        :return: list of branchpoint revisions
+        :param target: revision to set to, default 'head'
         """
-        return [revision for revision in self.script.walk_revisions() if revision.is_branch_point]
+
+        if target is None:
+            target = 'head'
+        else:
+            target = getattr(target, 'revision', target)
+
+        def do_stamp(revision, context):
+            return self.script._stamp_revs(target, revision)
+
+        self.run_migrations(do_stamp)
 
     def upgrade(self, target='head'):
         """Run migrations to upgrade database.
 
         :param target: revision to go to, default 'head'
         """
+
+        if target is None:
+            target = 'head'
+        else:
+            target = getattr(target, 'revision', target)
+
+        target = str(target)
+
         def do_upgrade(revision, context):
-            return self.script._upgrade_revs(str(target), revision)
+            return self.script._upgrade_revs(target, revision)
 
         self.run_migrations(do_upgrade)
 
@@ -261,23 +283,56 @@ class Alembic(object):
 
         :param target: revision to go down to, default -1
         """
+
+        try:
+            target = int(target)
+        except ValueError:
+            target = getattr(target, 'revision', target)
+        else:
+            if target > 0:
+                target = -target
+
+        target = str(target)
+
         def do_downgrade(revision, context):
-            return self.script._downgrade_revs(str(target), revision)
+            return self.script._downgrade_revs(target, revision)
 
         self.run_migrations(do_downgrade)
 
-    def revision(self, message, empty=False):
+    def revision(self, message, empty=False, head=None, splice=False, branch_labels=None, version_path=None):
         """Create a new revision.  By default, auto-generate operations by comparing models and database.
 
         :param message: description of revision
         :param empty: don't auto-generate operations
+        :param head: base new revision off this revision
+        :param splice: allow non-head base revision
+        :param branch_labels: labels to apply to this revision
+        :param version_path: where to store this revision
         :return: new revision
         """
-        config = self.config
-        script = self.script
+
+        if head is None:
+            head = 'head'
+        else:
+            head = getattr(head, 'revision', head)
+
+        if branch_labels is None:
+            branch_labels = []
+        elif isinstance(branch_labels, str):
+            branch_labels = [branch_labels]
+
+        branch = head.split('@')[0]
+        path = dict(item for item in current_app.config['ALEMBIC']['version_locations'] if not isinstance(item, str)).get(branch)
+
+        if not self.script.get_revisions(head) and not version_path and path is not None:
+            if not os.path.isabs(path) and ':' not in path:
+                path = os.path.join(current_app.root_path, path)
+
+            version_path = path
+            branch_labels.insert(0, head)
 
         template_args = {
-            'config': config
+            'config': self.config
         }
 
         if empty:
@@ -285,22 +340,24 @@ class Alembic(object):
                 return []
         else:
             def do_revision(revision, context):
-                if script.get_revision(revision) is not script.get_revision('head'):
+                if set(self.script.get_revisions(revision)) != set(self.script.get_revisions('heads')):
                     raise util.CommandError('Target database is not up to date')
 
                 autogenerate._produce_migration_diffs(context, template_args, set())
-
                 return []
 
-        use_env = util.asbool(config.get_main_option('revision_environment'))
-
-        if not empty or use_env:
+        if not empty or util.asbool(self.config.get_main_option('revision_environment')):
             self.run_migrations(do_revision)
 
-        return script.generate_revision(util.rev_id(), message, True, **template_args)
+        return self.script.generate_revision(
+            util.rev_id(), message,
+            head=head, splice=splice,
+            branch_labels=branch_labels, version_path=version_path,
+            **template_args
+        )
 
     def compare_metadata(self):
         """Generate a list of operations that would be present in a new revision."""
 
-        db = self._get_app().extensions['sqlalchemy'].db
+        db = current_app.extensions['sqlalchemy'].db
         return autogenerate.compare_metadata(self.context, db.metadata)

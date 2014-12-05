@@ -49,7 +49,7 @@ def upgrade(target):
     base.upgrade(target)
 
 
-@manager.option('target', nargs='?', default=-1)
+@manager.option('target', nargs='?', default='1')
 def downgrade(target):
     """Run downgrade migrations."""
     base.downgrade(target)
