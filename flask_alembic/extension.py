@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+from collections.abc import Iterable
+from alembic.revision import ResolutionError
 import os
 import shutil
 from alembic import autogenerate, util
@@ -320,16 +322,30 @@ class Alembic(object):
             branch_labels = []
         elif isinstance(branch_labels, str):
             branch_labels = [branch_labels]
+        elif isinstance(branch_labels, Iterable):
+            branch_labels = list(branch_labels)
+
+        # import pdb; pdb.set_trace()
 
         branch = head.split('@')[0]
         path = dict(item for item in current_app.config['ALEMBIC']['version_locations'] if not isinstance(item, str)).get(branch)
 
-        if not self.script.get_revisions(head) and not version_path and path is not None:
-            if not os.path.isabs(path) and ':' not in path:
-                path = os.path.join(current_app.root_path, path)
+        try:
+            existing = [r for r in self.script.revision_map.get_revisions(head) if r is not None]
+        except ResolutionError:
+            existing = None
 
-            version_path = path
-            branch_labels.insert(0, head)
+        if not existing and not version_path:
+            if path is None:
+                version_path = self.script.dir
+            else:
+                if not os.path.isabs(path) and ':' not in path:
+                    path = os.path.join(current_app.root_path, path)
+
+                version_path = path
+                branch_labels.insert(0, head)
+
+            head = 'base'
 
         template_args = {
             'config': self.config
@@ -354,6 +370,27 @@ class Alembic(object):
             head=head, splice=splice,
             branch_labels=branch_labels, version_path=version_path,
             **template_args
+        )
+
+    def merge(self, revisions, message=None, branch_labels=None):
+        """Create a merge revision.
+
+        :param revisions: list of revisions to merge
+        :param message: description of merge, will default to listing merged revisions
+        :param branch_labels: labels to apply to this revision
+        :return: new revision
+        """
+
+        revisions = [getattr(r, 'revision', r) for r in revisions]
+
+        if message is None:
+            message = 'merge {0}'.format(', '.join(revisions))
+
+        return self.script.generate_revision(
+            util.rev_id(), message,
+            head=revisions,
+            branch_labels=branch_labels,
+            config=self.config
         )
 
     def compare_metadata(self):
