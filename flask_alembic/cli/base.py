@@ -52,7 +52,7 @@ def branches(verbose=0):
                 ))
 
 
-def log(start='base', end='head', verbose=False):
+def log(start='base', end='heads', verbose=False):
     """Show the list of revisions in the order they will run."""
 
     a = get_alembic()
@@ -68,20 +68,20 @@ def show(revisions):
     a = get_alembic()
     print_stdout = a.config.print_stdout
 
-    if revisions == 'current':
+    if revisions == ('current',):
         current(verbose=True)
     else:
         for r in a.script.get_revisions(revisions):
             print_stdout(r.log_entry)
 
 
-def stamp(revision='head'):
+def stamp(revision='heads'):
     """Set the current revision without running migrations."""
 
     get_alembic().stamp(revision)
 
 
-def upgrade(target='head'):
+def upgrade(target='heads'):
     """Run migrations to upgrade the database."""
 
     get_alembic().upgrade(target)

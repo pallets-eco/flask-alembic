@@ -44,7 +44,7 @@ def branches(verbose):
 
 
 @manager.option('--start', default='base', help='Show since this revision.')
-@manager.option('--end', default='head', help='Show until this revision.')
+@manager.option('--end', default='heads', help='Show until this revision.')
 @manager.option('-v', '--verbose', action='store_true')
 def log(start, end, verbose):
     """Show revision log."""
@@ -59,14 +59,14 @@ def show(revisions):
     base.show(revisions)
 
 
-@manager.option('revision', nargs='?', default='head')
+@manager.option('revision', nargs='?', default='heads')
 def stamp(revision):
     """Set current revision."""
 
     base.stamp(revision)
 
 
-@manager.option('target', nargs='?', default='head')
+@manager.option('target', nargs='?', default='heads')
 def upgrade(target):
     """Run upgrade migrations."""
 

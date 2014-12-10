@@ -223,7 +223,7 @@ class Alembic(object):
 
         return [revision for revision in self.script.walk_revisions() if revision.is_branch_point]
 
-    def log(self, start=None, end=None):
+    def log(self, start='base', end='heads'):
         """Get the list of revisions in the order they will run.
 
         :param start: only get since this revision
@@ -246,14 +246,14 @@ class Alembic(object):
 
         return list(self.script.walk_revisions(start, end))
 
-    def stamp(self, target=None):
+    def stamp(self, target='heads'):
         """Set the current database revision without running migrations.
 
-        :param target: revision to set to, default 'head'
+        :param target: revision to set to, default 'heads'
         """
 
         if target is None:
-            target = 'head'
+            target = 'heads'
         else:
             target = getattr(target, 'revision', target)
 
@@ -262,14 +262,14 @@ class Alembic(object):
 
         self.run_migrations(do_stamp)
 
-    def upgrade(self, target='head'):
+    def upgrade(self, target='heads'):
         """Run migrations to upgrade database.
 
-        :param target: revision to go to, default 'head'
+        :param target: revision to go to, default 'heads'
         """
 
         if target is None:
-            target = 'head'
+            target = 'heads'
         else:
             target = getattr(target, 'revision', target)
 

@@ -35,7 +35,7 @@ def current(verbose):
 
 
 @cli.command()
-@click.option('--resolve-dependencies', is_flag=True)
+@click.option('--resolve-dependencies', is_flag=True, help='Treat dependencies as down revisions.')
 @click.option('-v', '--verbose', is_flag=True)
 def heads(resolve_dependencies, verbose):
     """Show latest revisions."""
@@ -53,7 +53,7 @@ def branches(verbose):
 
 @cli.command()
 @click.option('--start', default='base', help='Show since this revision.')
-@click.option('--end', default='head', help='Show until this revision.')
+@click.option('--end', default='heads', help='Show until this revision.')
 @click.option('-v', '--verbose', is_flag=True)
 def log(start, end, verbose):
     """Show revision log."""
@@ -70,7 +70,7 @@ def show(revisions):
 
 
 @cli.command()
-@click.argument('revision', default='head')
+@click.argument('revision', default='heads')
 def stamp(revision):
     """Set current revision."""
 
@@ -78,7 +78,7 @@ def stamp(revision):
 
 
 @cli.command()
-@click.argument('target', default='head')
+@click.argument('target', default='heads')
 def upgrade(target):
     """Run upgrade migrations."""
 
