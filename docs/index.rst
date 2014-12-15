@@ -28,7 +28,7 @@ Configuration for Alembic and its migrations is pulled from the following Flask 
 *   ``ALEMBIC`` is a dictionary containing general configuration, mostly used by :class:`alembic.config.Config` and :class:`alembic.script.ScriptDirectory`.  See Alembic's docs on `config`_.
 *   ``ALEMBIC_CONTEXT`` is a dictionary containing options passed to :class:`alembic.environment.EnvironmentContext` and :class:`alembic.migration.MigrationContext`.  See Alembic's docs on `context`_.
 
-The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to :param:
+The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to the instance folder.
 
 .. _config: https://alembic.readthedocs.org/en/latest/tutorial.html#editing-the-ini-file
 .. _context: https://alembic.readthedocs.org/en/latest/api.html#alembic.environment.EnvironmentContext.configure
