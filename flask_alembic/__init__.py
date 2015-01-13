@@ -12,4 +12,4 @@ flask_alembic
 
 from flask_alembic.extension import Alembic
 
-__version__ = '1.1.1'
+__version__ = '1.1.2'
