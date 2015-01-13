@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from collections.abc import Iterable
 from alembic.revision import ResolutionError
 import os
 import shutil
@@ -10,6 +9,11 @@ from alembic.operations import Operations
 from alembic.script import ScriptDirectory
 from flask import current_app
 from flask._compat import iteritems
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 
 class Alembic(object):
@@ -56,7 +60,6 @@ class Alembic(object):
         This is called automatically during app context teardown.
 
         :param exc: exception from teardown handler
-        :param app: if None, use current_app
         """
 
         cache = self._get_cache()
