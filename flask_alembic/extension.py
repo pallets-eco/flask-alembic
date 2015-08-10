@@ -30,7 +30,7 @@ class Alembic(object):
         self.run_mkdir = run_mkdir
 
         if app is not None:
-            self.init_app(app)
+            self.init_app(app, run_mkdir)
 
     def init_app(self, app, run_mkdir=None):
         """Register this extension on an app.  Will automatically set up migration directory by default.
@@ -102,7 +102,7 @@ class Alembic(object):
             c.set_main_option('version_locations', ','.join(version_locations))
 
             for key, value in iteritems(current_app.config['ALEMBIC']):
-                if key in {'script_location', 'version_locations'}:
+                if key in ('script_location', 'version_locations'):
                     continue
 
                 c.set_main_option(key, value)
@@ -327,8 +327,6 @@ class Alembic(object):
             branch_labels = [branch_labels]
         elif isinstance(branch_labels, Iterable):
             branch_labels = list(branch_labels)
-
-        # import pdb; pdb.set_trace()
 
         branch = head.split('@')[0]
         path = dict(item for item in current_app.config['ALEMBIC']['version_locations'] if not isinstance(item, str)).get(branch)

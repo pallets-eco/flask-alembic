@@ -1,3 +1,3 @@
-include requirements.txt AUTHORS.rst LICENSE.rst
+include LICENSE.rst
 recursive-include docs *
 prune docs/_build

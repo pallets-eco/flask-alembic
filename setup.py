@@ -1,17 +1,9 @@
 #!/usr/bin/env python
-import os
-import re
 from setuptools import setup, find_packages
-
-with open(os.path.join(os.path.dirname(__file__), 'flask_alembic', '__init__.py')) as f:
-    version = re.search(r"__version__ = '(.*)'", f.read()).group(1)
-
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
 
 setup(
     name='Flask-Alembic',
-    version=version,
+    version='1.1.2',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
@@ -30,5 +22,10 @@ setup(
         'Programming Language :: Python',
         'Topic :: Database :: Front-Ends',
     ],
-    install_requires=requirements,
+    install_requires=[
+        'alembic>=0.7',
+        'Flask>=0.10',
+        'Flask-SQLAlchemy>=2',
+        'SQLAlchemy>=0.9'
+    ],
 )

@@ -3,6 +3,8 @@ Flask-Alembic
 
 This `Flask`_ extension provides a configurable `Alembic`_ migration environment around a `Flask-SQLAlchemy`_ database.
 
+`Full documentation`_
+
 Installation
 ------------
 
@@ -10,9 +12,9 @@ Install releases from `PyPI`_::
 
     pip install Flask-Alembic
 
-Install latest code from `BitBucket`_::
+Install the latest code from `BitBucket`_::
 
-    pip install https://bitbucket.org/davidism/flask-alembic
+    pip install https://bitbucket.org/davidism/flask-alembic/get/default.tar.gz
 
 Basic Usage
 -----------
@@ -33,6 +35,11 @@ You've created a Flask application and some models with Flask-SQLAlchemy.  Now s
 
     # Access the internals
     environment_context = alembic.env
+
+Commands are included for Click and Flask-Script::
+
+    $ ./manage.py db revision "making changes"
+    $ ./manage.py db upgrade
 
 Differences from Alembic core
 -----------------------------
@@ -60,3 +67,4 @@ TODO
 .. _PyPI: https://pypi.python.org/pypi/Flask-Alembic
 .. _BitBucket: https://bitbucket.org/davidism/flask-alembic
 .. _Flask-Migrate: https://flask-migrate.readthedocs.org/en/latest/
+.. _Full documentation: https://flask-alembic.readthedocs.org/
