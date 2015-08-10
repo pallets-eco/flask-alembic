@@ -22,7 +22,10 @@ def current(verbose=False):
     print_stdout = a.config.print_stdout
 
     for r in a.current():
-        print_stdout(r.cmd_format(verbose) if r is not None else None)
+        if r is None:
+            print_stdout(None)
+        else:
+            print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True))
 
 
 def heads(resolve_dependencies=False, verbose=False):
@@ -32,10 +35,10 @@ def heads(resolve_dependencies=False, verbose=False):
     print_stdout = a.config.print_stdout
 
     for r in a.heads(resolve_dependencies):
-        print_stdout(r.cmd_format(verbose, include_branches=True, tree_indicators=False))
+        print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True))
 
 
-def branches(verbose=0):
+def branches(verbose=False):
     """Show the list of revisions that have more than one next revision."""
 
     a = get_alembic()
@@ -43,13 +46,11 @@ def branches(verbose=0):
     get_revision = a.script.get_revision
 
     for r in a.branches():
-        print_stdout(r.cmd_format(verbose > 0, include_branches=True))
+        print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True))
 
-        if verbose > 1:
-            for nr in r.nextrev:
-                print_stdout('    -> {0}'.format(
-                    get_revision(nr).cmd_format(False, include_branches=True, include_doc=verbose > 2)
-                ))
+        for nr in r.nextrev:
+            nr = get_revision(nr)
+            print_stdout('    -> {0}'.format(nr.cmd_format(False, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True)))
 
 
 def log(start='base', end='heads', verbose=False):
@@ -59,7 +60,7 @@ def log(start='base', end='heads', verbose=False):
     print_stdout = a.config.print_stdout
 
     for r in a.log(start, end):
-        print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True))
+        print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True))
 
 
 def show(revisions):
@@ -72,7 +73,7 @@ def show(revisions):
         current(verbose=True)
     else:
         for r in a.script.get_revisions(revisions):
-            print_stdout(r.log_entry)
+            print_stdout(r.cmd_format(True))
 
 
 def stamp(revision='heads'):
