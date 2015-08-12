@@ -1,11 +1,11 @@
 from __future__ import absolute_import
-from alembic.revision import ResolutionError
 import os
 import shutil
 from alembic import autogenerate, util
 from alembic.config import Config
 from alembic.environment import EnvironmentContext
 from alembic.operations import Operations
+from alembic.revision import ResolutionError
 from alembic.script import ScriptDirectory
 from flask import current_app
 from flask._compat import iteritems, string_types
