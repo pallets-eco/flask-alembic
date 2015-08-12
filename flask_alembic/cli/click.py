@@ -44,7 +44,7 @@ def heads(resolve_dependencies, verbose):
 
 
 @cli.command()
-@click.option('-v', '--verbose', count=True)
+@click.option('-v', '--verbose', is_flag=True)
 def branches(verbose):
     """Show branch points."""
 
@@ -70,11 +70,11 @@ def show(revisions):
 
 
 @cli.command()
-@click.argument('revision', default='heads')
-def stamp(revision):
+@click.argument('target', default='heads')
+def stamp(target):
     """Set current revision."""
 
-    base.stamp(revision)
+    base.stamp(target)
 
 
 @cli.command()
@@ -96,22 +96,23 @@ def downgrade(target):
 @cli.command()
 @click.argument('message')
 @click.option('--empty', is_flag=True, help='Create empty script.')
-@click.option('--head', help='Base off this revision.')
-@click.option('--splice', is_flag=True, help='Allow non-head base revision.')
-@click.option('-l', '--branch-label', multiple=True, help='Apply a label to the revision.  Can be specified multiple times.')
-@click.option('--version-path', help='Where to store the revision.')
-def revision(message, empty, head, splice, branch_label, version_path):
+@click.option('-b', '--branch', default='default', help='Use this independent branch name.')
+@click.option('-p', '--parent', multiple=True, default=['head'], help='Parent revision(s) of this revision.')
+@click.option('--splice', is_flag=True, help='Allow non-head parent revision.')
+@click.option('-d', '--depend', multiple=True, help='Revision(s) this revision depends on.')
+@click.option('-l', '--label', multiple=True, help='Label(s) to apply to the revision.')
+@click.option('--path', help='Where to store the revision.')
+def revision(message, empty, branch, parent, splice, depend, label, path):
     """Create new migration."""
 
-    base.revision(message, empty, head, splice, branch_label, version_path)
+    base.revision(message, empty, branch, parent, splice, depend, label, path)
 
 
 @cli.command()
 @click.argument('revisions', nargs=-1)
 @click.option('-m', '--message')
-@click.option('-l', '--branch-label', multiple=True, help='Apply a label to the revision.  Can be specified multiple times.')
-@click.option('--version-path', help='Where to store the revision.')
-def merge(revisions, message, branch_label):
+@click.option('-l', '--label', multiple=True, help='Label(s) to apply to the revision.')
+def merge(revisions, message, label):
     """Create merge revision."""
 
-    base.merge(revisions, message, branch_label)
+    base.merge(revisions, message, label)

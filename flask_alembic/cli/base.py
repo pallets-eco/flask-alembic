@@ -69,17 +69,14 @@ def show(revisions):
     a = get_alembic()
     print_stdout = a.config.print_stdout
 
-    if revisions == ('current',):
-        current(verbose=True)
-    else:
-        for r in a.script.get_revisions(revisions):
-            print_stdout(r.cmd_format(True))
+    for r in a.script.get_revisions(revisions):
+        print_stdout(r.cmd_format(True))
 
 
-def stamp(revision='heads'):
+def stamp(target='heads'):
     """Set the current revision without running migrations."""
 
-    get_alembic().stamp(revision)
+    get_alembic().stamp(target)
 
 
 def upgrade(target='heads'):
@@ -94,13 +91,13 @@ def downgrade(target=-1):
     get_alembic().downgrade(target)
 
 
-def revision(message, empty=False, head=None, splice=False, branch_labels=None, version_path=None):
+def revision(message, empty=False, branch='default', parent='head', splice=False, depend=None, label=None, path=None):
     """Generate a new revision."""
 
-    get_alembic().revision(message, empty, head, splice, branch_labels, version_path)
+    get_alembic().revision(message, empty, branch, parent, splice, depend, label, path)
 
 
-def merge(revisions, message=None, branch_labels=None):
+def merge(revisions, message=None, label=None):
     """Generate a merge revision."""
 
-    get_alembic().merge(revisions, message, branch_labels)
+    get_alembic().merge(revisions, message, label)

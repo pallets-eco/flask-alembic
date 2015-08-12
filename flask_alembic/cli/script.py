@@ -59,11 +59,11 @@ def show(revisions):
     base.show(revisions)
 
 
-@manager.option('revision', nargs='?', default='heads')
-def stamp(revision):
+@manager.option('target', nargs='?', default='heads')
+def stamp(target):
     """Set current revision."""
 
-    base.stamp(revision)
+    base.stamp(target)
 
 
 @manager.option('target', nargs='?', default='heads')
@@ -82,21 +82,22 @@ def downgrade(target):
 
 @manager.option('message')
 @manager.option('--empty', action='store_true', help='Create empty script.')
-@manager.option('--head', help='Base off this revision.')
-@manager.option('--splice', action='store_true', help='Allow non-head base revision.')
-@manager.option('--branch-labels', nargs='*', help='Labels to apply to the revision.')
-@manager.option('--version-path', help='Where to store the revision.')
-def revision(message, empty, head, splice, branch_labels, version_path):
+@manager.option('-b', '--branch', default='default', help='Use this independent branch name.')
+@manager.option('-p', '--parent', default='head', type=str.split, help='Parent revision(s) of this revision.')
+@manager.option('--splice', action='store_true', help='Allow non-head parent revision.')
+@manager.option('-d', '--depend', type=str.split, help='Revision(s) this revision depends on.')
+@manager.option('-l', '--label', type=str.split, help='Label(s) to apply to the revision.')
+@manager.option('--path', help='Where to store the revision.')
+def revision(message, empty, branch, parent, splice, depend, label, path):
     """Create new migration."""
 
-    base.revision(message, empty, head, splice, branch_labels, version_path)
+    base.revision(message, empty, branch, parent, splice, depend, label, path)
 
 
-@manager.option('parent')
-@manager.option('parents', nargs='+')
+@manager.option('revisions', nargs='*')
 @manager.option('-m', '--message')
-@manager.option('--branch-labels', nargs='*', help='Labels to apply to the revision.')
-def merge(revisions, message, branch_labels):
+@manager.option('-l', '--label', type=str.split, help='Label(s) to apply to the revision.')
+def merge(revisions, message, label):
     """Create merge revision."""
 
-    base.merge(revisions, message, branch_labels)
+    base.merge(revisions, message, label)

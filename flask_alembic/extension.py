@@ -8,7 +8,7 @@ from alembic.environment import EnvironmentContext
 from alembic.operations import Operations
 from alembic.script import ScriptDirectory
 from flask import current_app
-from flask._compat import iteritems
+from flask._compat import iteritems, string_types
 
 try:
     from collections.abc import Iterable
@@ -91,7 +91,7 @@ class Alembic(object):
             version_locations = [script_location]
 
             for item in current_app.config['ALEMBIC']['version_locations']:
-                version_location = item if isinstance(item, str) else item[1]
+                version_location = item if isinstance(item, string_types) else item[1]
 
                 if not os.path.isabs(version_location) and ':' not in version_location:
                     version_location = os.path.join(current_app.root_path, version_location)
@@ -255,10 +255,7 @@ class Alembic(object):
         :param target: revision to set to, default 'heads'
         """
 
-        if target is None:
-            target = 'heads'
-        else:
-            target = getattr(target, 'revision', target)
+        target = 'heads' if target is None else getattr(target, 'revision', target)
 
         def do_stamp(revision, context):
             return self.script._stamp_revs(target, revision)
@@ -271,11 +268,7 @@ class Alembic(object):
         :param target: revision to go to, default 'heads'
         """
 
-        if target is None:
-            target = 'heads'
-        else:
-            target = getattr(target, 'revision', target)
-
+        target = 'heads' if target is None else getattr(target, 'revision', target)
         target = str(target)
 
         def do_upgrade(revision, context):
@@ -304,49 +297,62 @@ class Alembic(object):
 
         self.run_migrations(do_downgrade)
 
-    def revision(self, message, empty=False, head=None, splice=False, branch_labels=None, version_path=None):
+    def revision(self, message, empty=False, branch='default', parent='head', splice=False, depend=None, label=None, path=None):
         """Create a new revision.  By default, auto-generate operations by comparing models and database.
 
         :param message: description of revision
         :param empty: don't auto-generate operations
-        :param head: base new revision off this revision
-        :param splice: allow non-head base revision
-        :param branch_labels: labels to apply to this revision
-        :param version_path: where to store this revision
+        :param branch: use this independent branch name
+        :param parent: parent revision(s) of this revision
+        :param splice: allow non-head parent revision
+        :param depend: revision(s) this revision depends on
+        :param label: label(s) to apply to this revision
+        :param path: where to store this revision
         :return: new revision
         """
 
-        if head is None:
-            head = 'head'
+        if parent is None:
+            parent = ('head',)
+        elif isinstance(parent, string_types):
+            parent = (parent,)
         else:
-            head = getattr(head, 'revision', head)
+            parent = [getattr(r, 'revision', r) for r in parent]
 
-        if branch_labels is None:
-            branch_labels = []
-        elif isinstance(branch_labels, str):
-            branch_labels = [branch_labels]
-        elif isinstance(branch_labels, Iterable):
-            branch_labels = list(branch_labels)
+        if label is None:
+            label = []
+        elif isinstance(label, string_types):
+            label = [label,]
+        else:
+            label = list(label)
 
-        branch = head.split('@')[0]
-        path = dict(item for item in current_app.config['ALEMBIC']['version_locations'] if not isinstance(item, str)).get(branch)
+        # manage independent branches
+        if branch:
+            for i, item in enumerate(parent):
+                if item in ('base', 'head'):
+                    parent[i] = '{}@{}'.format(branch, item)
 
-        try:
-            existing = [r for r in self.script.revision_map.get_revisions(head) if r is not None]
-        except ResolutionError:
-            existing = None
+            if not path:
+                branch_path = dict(item for item in current_app.config['ALEMBIC']['version_locations'] if not isinstance(item, string_types)).get(branch)
 
-        if not existing and not version_path:
-            if path is None:
-                version_path = self.script.dir
-            else:
-                if not os.path.isabs(path) and ':' not in path:
-                    path = os.path.join(current_app.root_path, path)
+                if branch_path:
+                    path = branch_path
 
-                version_path = path
-                branch_labels.insert(0, head)
+            try:
+                branch_exists = any(r for r in self.script.revision_map.get_revisions(branch) if r is not None)
+            except ResolutionError:
+                branch_exists = False
 
-            head = 'base'
+            if not branch_exists:
+                # label the first revision of a separate branch and start it from base
+                label.insert(0, branch)
+                parent = ('base',)
+
+        if not path:
+            path = self.script.dir
+
+        # relative path is relative to app root
+        if path and not os.path.isabs(path) and ':' not in path:
+            path = os.path.join(current_app.root_path, path)
 
         template_args = {
             'config': self.config
@@ -368,29 +374,37 @@ class Alembic(object):
 
         return self.script.generate_revision(
             util.rev_id(), message,
-            head=head, splice=splice,
-            branch_labels=branch_labels, version_path=version_path,
+            head=parent, splice=splice, depends_on=depend,
+            branch_labels=label, version_path=path,
             **template_args
         )
 
-    def merge(self, revisions, message=None, branch_labels=None):
+    def merge(self, revisions='heads', message=None, label=None):
         """Create a merge revision.
 
-        :param revisions: list of revisions to merge
-        :param message: description of merge, will default to listing merged revisions
-        :param branch_labels: labels to apply to this revision
+        :param revisions: revisions to merge
+        :param message: description of merge, will default to revisions param
+        :param label: label(s) to apply to this revision
         :return: new revision
         """
 
-        revisions = [getattr(r, 'revision', r) for r in revisions]
+        if not revisions:
+            revisions = ('heads',)
+        elif isinstance(revisions, string_types):
+            revisions = (revisions,)
+        else:
+            revisions = [getattr(r, 'revision', r) for r in revisions]
 
         if message is None:
             message = 'merge {0}'.format(', '.join(revisions))
 
+        if isinstance(label, string_types):
+            label = (label,)
+
         return self.script.generate_revision(
             util.rev_id(), message,
             head=revisions,
-            branch_labels=branch_labels,
+            branch_labels=label,
             config=self.config
         )
 
