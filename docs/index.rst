@@ -76,13 +76,14 @@ If you have set up a :class:`flask_script.Manager` for your project using Flask-
     from flask_alembic.cli.script import manager as alembic_manager
     app_manager.add_command('db', alembic_manager)
 
-If you are using a newer Flask, the preferred interface is Click::
+If you are using a newer Flask, the preferred interface is Click.  If you are using Flask 0.10, you can use backported integration via Flask-CLI. ::
 
     from flask_alembic.cli.click import cli as alembic_cli
     app.cli.add_command(alembic_cli, 'db')
 
 .. _Flask-Script: https://flask-script.readthedocs.org/en/latest/
 .. _Click: http://click.pocoo.org/
+.. _Flask-CLI: http://flask-cli.readthedocs.org/en/latest/
 
 Differences from Alembic
 ------------------------
