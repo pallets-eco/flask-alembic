@@ -1,4 +1,4 @@
-Copyright (c) 2015 by David Lord.
+Copyright (c) 2015 by David Lord and contributors.
 
 Some rights reserved.
 

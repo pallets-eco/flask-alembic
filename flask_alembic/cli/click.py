@@ -8,11 +8,12 @@
 
 from __future__ import absolute_import
 import click
+from flask_alembic.cli import base
+
 try:
     from flask.cli import AppGroup
 except ImportError:
     from flask_cli import AppGroup
-from flask_alembic.cli import base
 
 
 @click.command(cls=AppGroup)
