@@ -1,19 +1,14 @@
-from __future__ import absolute_import
 import os
 import shutil
-from alembic import autogenerate, util
+
+from alembic import util, autogenerate
 from alembic.config import Config
-from alembic.environment import EnvironmentContext
 from alembic.operations import Operations
-from alembic.revision import ResolutionError
+from alembic.runtime.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
+from alembic.script.revision import ResolutionError
 from flask import current_app
 from flask._compat import iteritems, string_types
-
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 
 
 class Alembic(object):
@@ -110,7 +105,7 @@ class Alembic(object):
         return cache['config']
 
     @property
-    def script(self):
+    def script_directory(self):
         """Get the Alembic :class:`~alembic.script.ScriptDirectory` for the current app."""
 
         cache = self._get_cache()
@@ -121,27 +116,26 @@ class Alembic(object):
         return cache['script']
 
     @property
-    def env(self):
+    def environment_context(self):
         """Get the Alembic :class:`~alembic.environment.EnvironmentContext` for the current app."""
 
         cache = self._get_cache()
 
         if 'env' not in cache:
-            cache['env'] = EnvironmentContext(self.config, self.script)
+            cache['env'] = EnvironmentContext(self.config, self.script_directory)
 
         return cache['env']
 
     @property
-    def context(self):
+    def migration_context(self):
         """Get the Alembic :class:`~alembic.migration.MigrationContext` for the current app."""
 
         cache = self._get_cache()
 
         if 'context' not in cache:
             db = current_app.extensions['sqlalchemy'].db
+            env = self.environment_context
             conn = db.engine.connect()
-
-            env = self.env
             env.configure(
                 connection=conn, target_metadata=db.metadata,
                 **current_app.config['ALEMBIC_CONTEXT']
@@ -157,7 +151,7 @@ class Alembic(object):
         cache = self._get_cache()
 
         if 'op' not in cache:
-            cache['op'] = Operations(self.context)
+            cache['op'] = Operations(self.migration_context)
 
         return cache['op']
 
@@ -167,23 +161,20 @@ class Alembic(object):
         This takes the place of Alembic's env.py file, specifically the ``run_migrations_online`` function.
 
         :param fn: use this function to control what migrations are run
-        :param kwargs: extra arguments passed to revision function
+        :param kwargs: extra arguments passed to ``upgrade`` or ``downgrade`` in each revision
         """
 
         db = current_app.extensions['sqlalchemy'].db
-        conn = db.engine.connect()
+        env = self.environment_context
 
-        env = self.env
-        env.configure(
-            connection=conn, target_metadata=db.metadata, fn=fn,
-            **current_app.config['ALEMBIC_CONTEXT']
-        )
+        with db.engine.connect() as connection:
+            env.configure(
+                connection=connection, target_metadata=db.metadata, fn=fn,
+                **current_app.config['ALEMBIC_CONTEXT']
+            )
 
-        try:
             with env.begin_transaction():
                 env.run_migrations(**kwargs)
-        finally:
-            conn.close()
 
     def mkdir(self):
         """Create the script directory and template."""
@@ -201,14 +192,14 @@ class Alembic(object):
         if not os.access(template_dest, os.F_OK):
             shutil.copy(template_src, template_dest)
 
-        for version_location in self.script._version_locations:
+        for version_location in self.script_directory._version_locations:
             if not os.access(version_location, os.F_OK):
                 os.makedirs(version_location)
 
     def current(self):
         """Get the list of current revisions."""
 
-        return self.script.get_revisions(self.context.get_current_heads())
+        return self.script_directory.get_revisions(self.migration_context.get_current_heads())
 
     def heads(self, resolve_dependencies=False):
         """Get the list of revisions that have no child revisions.
@@ -217,14 +208,14 @@ class Alembic(object):
         """
 
         if resolve_dependencies:
-            return self.script.get_revisions('heads')
+            return self.script_directory.get_revisions('heads')
 
-        return self.script.get_revisions(self.script.get_heads())
+        return self.script_directory.get_revisions(self.script_directory.get_heads())
 
     def branches(self):
         """Get the list of revisions that have more than one next revision."""
 
-        return [revision for revision in self.script.walk_revisions() if revision.is_branch_point]
+        return [revision for revision in self.script_directory.walk_revisions() if revision.is_branch_point]
 
     def log(self, start='base', end='heads'):
         """Get the list of revisions in the order they will run.
@@ -247,7 +238,7 @@ class Alembic(object):
         else:
             end = getattr(end, 'revision', end)
 
-        return list(self.script.walk_revisions(start, end))
+        return list(self.script_directory.walk_revisions(start, end))
 
     def stamp(self, target='heads'):
         """Set the current database revision without running migrations.
@@ -258,7 +249,7 @@ class Alembic(object):
         target = 'heads' if target is None else getattr(target, 'revision', target)
 
         def do_stamp(revision, context):
-            return self.script._stamp_revs(target, revision)
+            return self.script_directory._stamp_revs(target, revision)
 
         self.run_migrations(do_stamp)
 
@@ -272,7 +263,7 @@ class Alembic(object):
         target = str(target)
 
         def do_upgrade(revision, context):
-            return self.script._upgrade_revs(target, revision)
+            return self.script_directory._upgrade_revs(target, revision)
 
         self.run_migrations(do_upgrade)
 
@@ -293,7 +284,7 @@ class Alembic(object):
         target = str(target)
 
         def do_downgrade(revision, context):
-            return self.script._downgrade_revs(target, revision)
+            return self.script_directory._downgrade_revs(target, revision)
 
         self.run_migrations(do_downgrade)
 
@@ -308,7 +299,7 @@ class Alembic(object):
         :param depend: revision(s) this revision depends on
         :param label: label(s) to apply to this revision
         :param path: where to store this revision
-        :return: new revision
+        :return: list of new revisions
         """
 
         if parent is None:
@@ -338,7 +329,7 @@ class Alembic(object):
                     path = branch_path
 
             try:
-                branch_exists = any(r for r in self.script.revision_map.get_revisions(branch) if r is not None)
+                branch_exists = any(r for r in self.script_directory.revision_map.get_revisions(branch) if r is not None)
             except ResolutionError:
                 branch_exists = False
 
@@ -348,36 +339,37 @@ class Alembic(object):
                 parent = ('base',)
 
         if not path:
-            path = self.script.dir
+            path = self.script_directory.dir
 
         # relative path is relative to app root
         if path and not os.path.isabs(path) and ':' not in path:
             path = os.path.join(current_app.root_path, path)
 
-        template_args = {
-            'config': self.config
-        }
+        revision_context = autogenerate.RevisionContext(
+            self.config, self.script_directory, {
+                'message': message,
+                'sql': False,
+                'head': parent,
+                'splice': splice,
+                'branch_label': label,
+                'version_path': path,
+                'rev_id': None,
+                'depends_on': depend
+            }
+        )
 
-        if empty:
-            def do_revision(revision, context):
-                return []
-        else:
-            def do_revision(revision, context):
-                if set(self.script.get_revisions(revision)) != set(self.script.get_revisions('heads')):
-                    raise util.CommandError('Target database is not up to date')
+        def do_revision(revision, context):
+            if empty:
+                revision_context.run_no_autogenerate(revision, context)
+            else:
+                revision_context.run_autogenerate(revision, context)
 
-                autogenerate._produce_migration_diffs(context, template_args, set())
-                return []
+            return []
 
         if not empty or util.asbool(self.config.get_main_option('revision_environment')):
             self.run_migrations(do_revision)
 
-        return self.script.generate_revision(
-            util.rev_id(), message,
-            head=parent, splice=splice, depends_on=depend,
-            branch_labels=label, version_path=path,
-            **template_args
-        )
+        return list(revision_context.generate_scripts())
 
     def merge(self, revisions='heads', message=None, label=None):
         """Create a merge revision.
@@ -401,15 +393,21 @@ class Alembic(object):
         if isinstance(label, string_types):
             label = (label,)
 
-        return self.script.generate_revision(
+        return self.script_directory.generate_revision(
             util.rev_id(), message,
             head=revisions,
             branch_labels=label,
             config=self.config
         )
 
+    def produce_migrations(self):
+        """Generate the :class:`~alembic.autogenerate.MigrationScript` object that would generate a new revision."""
+
+        db = current_app.extensions['sqlalchemy'].db
+        return autogenerate.produce_migrations(self.migration_context, db.metadata)
+
     def compare_metadata(self):
         """Generate a list of operations that would be present in a new revision."""
 
         db = current_app.extensions['sqlalchemy'].db
-        return autogenerate.compare_metadata(self.context, db.metadata)
+        return autogenerate.compare_metadata(self.migration_context, db.metadata)

@@ -43,7 +43,7 @@ def branches(verbose=False):
 
     a = get_alembic()
     print_stdout = a.config.print_stdout
-    get_revision = a.script.get_revision
+    get_revision = a.script_directory.get_revision
 
     for r in a.branches():
         print_stdout(r.cmd_format(verbose, include_branches=True, include_doc=True, include_parents=True, tree_indicators=True))
@@ -69,7 +69,7 @@ def show(revisions):
     a = get_alembic()
     print_stdout = a.config.print_stdout
 
-    for r in a.script.get_revisions(revisions):
+    for r in a.script_directory.get_revisions(revisions):
         print_stdout(r.cmd_format(True))
 
 

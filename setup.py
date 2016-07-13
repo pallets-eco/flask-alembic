@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Flask-Alembic',
-    version='1.2.2',
+    version='2.0.0',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
@@ -20,10 +20,15 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Database :: Front-Ends',
     ],
     install_requires=[
-        'alembic>=0.7,<0.8',
+        'alembic>=0.8',
         'Flask>=0.10',
         'Flask-SQLAlchemy',
         'SQLAlchemy'
