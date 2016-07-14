@@ -1,7 +1,7 @@
 """Integration with Flask-Script::
 
-    from flask_alembic.cli.script import manager as alembic_manager
-    manager.add_command('db', alembic_manager)
+    from flask_alembic import alembic_script
+    manager.add_command('db', alembic_script)
 
 \\
 """

@@ -1,7 +1,9 @@
 """Integration with Click::
 
-    from flask_alembic.cli.click import cli as alembic_cli
-    app.cli.add_command(alembic_cli, 'db')
+    from flask_alembic import alembic_click
+    app.cli.add_command(alembic_click, 'db')
+
+This is done automatically by Flask-Alembic if it detects ``app.cli``.
 
 \\
 """

@@ -81,7 +81,7 @@ class Alembic(object):
     def rev_id(self):
         """Generate a unique id for a revision.
 
-        By default this uses Alembic's :func:`~alembic.util.rev_id`.
+        By default this uses :func:`alembic.util.rev_id`.
         Override this method, or assign a static method, to change this.
 
         For example, to use the current timestamp::
@@ -140,7 +140,7 @@ class Alembic(object):
 
     @property
     def environment_context(self):
-        """Get the Alembic :class:`~alembic.environment.EnvironmentContext` for the current app."""
+        """Get the Alembic :class:`~alembic.runtime.environment.EnvironmentContext` for the current app."""
 
         cache = self._get_cache()
 
@@ -151,7 +151,7 @@ class Alembic(object):
 
     @property
     def migration_context(self):
-        """Get the Alembic :class:`~alembic.migration.MigrationContext` for the current app.
+        """Get the Alembic :class:`~alembic.runtime.migration.MigrationContext` for the current app.
 
         Accessing this property opens a database connection but can't close it automatically.
         Make sure to call ``migration_context.connection.close()`` when you're done.
@@ -187,7 +187,7 @@ class Alembic(object):
         return cache['op']
 
     def run_migrations(self, fn, **kwargs):
-        """Configure an Alembic :class:`~alembic.migration.MigrationContext` to run migrations for the given function.
+        """Configure an Alembic :class:`~alembic.runtime.migration.MigrationContext` to run migrations for the given function.
 
         This takes the place of Alembic's env.py file, specifically the ``run_migrations_online`` function.
 

@@ -16,7 +16,7 @@ The latest code is hosted on `BitBucket <source_>`_.  Install with pip::
 
 .. _Flask: https://palletsprojects.com/p/flask/
 .. _Flask-SQLAlchemy: https://flask-sqlalchemy.pocoo.org/
-.. _Alembic: https://alembic.readthedocs.org/en/latest/
+.. _Alembic: http://alembic.zzzcomputing.com/en/latest/
 .. _release: https://pypi.python.org/pypi/Flask-Alembic
 .. _source: https://bitbucket.org/davidism/flask-alembic
 
@@ -30,8 +30,8 @@ Configuration for Alembic and its migrations is pulled from the following Flask 
 
 The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to the instance folder.
 
-.. _config: https://alembic.readthedocs.io/en/latest/tutorial.html#editing-the-ini-file
-.. _context: https://alembic.readthedocs.io/en/latest/api.html#alembic.environment.EnvironmentContext.configure
+.. _config: http://alembic.zzzcomputing.com/en/latest/tutorial.html#editing-the-ini-file
+.. _context: http://alembic.zzzcomputing.com/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure
 
 Basic Usage
 -----------
@@ -64,7 +64,7 @@ You can also get at the Alembic internals that enable these commands.  See the `
     alembic.op.drop_column('my_table', 'my_column')  # probably don't want to do this outside a revision, but it'll work
     alembic.compare_metadata()  # see that that column you just dropped will be added back next revision
 
-.. _api: https://alembic.readthedocs.io/en/latest/api.html
+.. _api: http://alembic.zzzcomputing.com/en/latest/api/index.html
 
 Command Line
 ------------
@@ -86,7 +86,7 @@ If you have set up a :class:`flask_script.Manager` for your project using Flask-
     python manage.py db
 
 .. _Flask-Script: https://flask-script.readthedocs.io/en/latest/
-.. _Click: http://click.pocoo.org/
+.. _Click: https://palletsprojects.com/p/click/
 .. _Flask-CLI: https://flask-cli.readthedocs.io/en/latest/
 
 Differences from Alembic

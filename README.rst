@@ -59,10 +59,10 @@ Differences from Flask-Migrate
 
 `Flask-Migrate`_ is a simple wrapper around the existing Alembic commands.  It associates the Flask-SQLAlchemy database with Alembic, and wraps the Alembic commands with Flask-Script.  It still requires the standard Alembic file structure, does not integrate with Flask configuration, and does not expose the Alembic internals.
 
-.. _Flask: http://flask.pocoo.org/
-.. _Flask-SQLAlchemy: https://pythonhosted.org/Flask-SQLAlchemy/
-.. _Alembic: https://alembic.readthedocs.org/en/latest/
+.. _Flask: https://palletsprojects.com/p/flask/
+.. _Flask-SQLAlchemy: http://flask-sqlalchemy.pocoo.org/
+.. _Alembic: https://alembic.zzzcomputing.com/en/latest/
 .. _PyPI: https://pypi.python.org/pypi/Flask-Alembic
 .. _BitBucket: https://bitbucket.org/davidism/flask-alembic
-.. _Flask-Migrate: https://flask-migrate.readthedocs.org/en/latest/
-.. _Full documentation: https://flask-alembic.readthedocs.org/
+.. _Flask-Migrate: https://flask-migrate.readthedocs.io/en/latest/
+.. _Full documentation: https://flask-alembic.readthedocs.io/
