@@ -1,6 +1,8 @@
+import logging
 import os
 import shutil
 
+import sys
 from alembic import util, autogenerate
 from alembic.config import Config
 from alembic.operations import Operations
@@ -16,6 +18,9 @@ class Alembic(object):
 
     If instantiated without an app instance, :meth:`init_app` is used to register an app at a later time.
 
+    Configures basic logging to ``stderr`` for the ``sqlalchemy`` and
+    ``alembic`` loggers if they do not already have handlers.
+
     :param app: call ``init_app`` on this app
     :param run_mkdir: whether to run :meth:`mkdir` during ``init_app``
     :param command_name: register a Click command with this name during ``init_app``, or skip if ``False``
@@ -25,6 +30,28 @@ class Alembic(object):
         self._cache = {}
         self.run_mkdir = run_mkdir
         self.command_name = command_name
+
+        # add logging handler if not configured
+        console_handler = logging.StreamHandler(sys.stderr)
+        console_handler.formatter = logging.Formatter(
+            fmt='%(levelname)-5.5s [%(name)s] %(message)s',
+            datefmt='%H:%M:%S'
+        )
+
+        sqlalchemy_logger = logging.getLogger('sqlalchemy')
+        alembic_logger = logging.getLogger('alembic')
+
+        if not sqlalchemy_logger.hasHandlers():
+            sqlalchemy_logger.setLevel(logging.WARNING)
+            sqlalchemy_logger.addHandler(console_handler)
+
+        # alembic adds a null handler, remove it
+        if len(alembic_logger.handlers) == 1 and isinstance(alembic_logger.handlers[0], logging.NullHandler):
+            alembic_logger.removeHandler(alembic_logger.handlers[0])
+
+        if not alembic_logger.hasHandlers():
+            alembic_logger.setLevel(logging.INFO)
+            alembic_logger.addHandler(console_handler)
 
         if app is not None:
             self.init_app(app, run_mkdir)
