@@ -334,16 +334,16 @@ class Alembic(object):
         """
 
         if parent is None:
-            parent = ('head',)
+            parent = ['head']
         elif isinstance(parent, string_types):
-            parent = (parent,)
+            parent = [parent]
         else:
             parent = [getattr(r, 'revision', r) for r in parent]
 
         if label is None:
             label = []
         elif isinstance(label, string_types):
-            label = [label,]
+            label = [label]
         else:
             label = list(label)
 
@@ -367,7 +367,7 @@ class Alembic(object):
             if not branch_exists:
                 # label the first revision of a separate branch and start it from base
                 label.insert(0, branch)
-                parent = ('base',)
+                parent = ['base']
 
         if not path:
             path = self.script_directory.dir
@@ -412,9 +412,9 @@ class Alembic(object):
         """
 
         if not revisions:
-            revisions = ('heads',)
+            revisions = ['heads']
         elif isinstance(revisions, string_types):
-            revisions = (revisions,)
+            revisions = [revisions]
         else:
             revisions = [getattr(r, 'revision', r) for r in revisions]
 
@@ -422,7 +422,7 @@ class Alembic(object):
             message = 'merge {0}'.format(', '.join(revisions))
 
         if isinstance(label, string_types):
-            label = (label,)
+            label = [label]
 
         return self.script_directory.generate_revision(
             rev_id=self.rev_id(),
