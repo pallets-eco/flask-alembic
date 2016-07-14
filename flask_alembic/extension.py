@@ -78,6 +78,20 @@ class Alembic(object):
 
         return self._cache[current_app._get_current_object()]
 
+    def rev_id(self):
+        """Generate a unique id for a revision.
+
+        By default this uses Alembic's :func:`~alembic.util.rev_id`.
+        Override this method, or assign a static method, to change this.
+
+        For example, to use the current timestamp::
+
+            alembic = Alembic(app)
+            alembic.rev_id = lambda: datetime.utcnow().timestamp()
+        """
+
+        return util.rev_id()
+
     @property
     def config(self):
         """Get the Alembic :class:`~alembic.config.Config` for the current app."""
@@ -370,7 +384,7 @@ class Alembic(object):
                 'splice': splice,
                 'branch_label': label,
                 'version_path': path,
-                'rev_id': None,
+                'rev_id': self.rev_id(),
                 'depends_on': depend
             }
         )
@@ -411,7 +425,8 @@ class Alembic(object):
             label = (label,)
 
         return self.script_directory.generate_revision(
-            util.rev_id(), message,
+            rev_id=self.rev_id(),
+            message=message,
             head=revisions,
             branch_labels=label,
             config=self.config
