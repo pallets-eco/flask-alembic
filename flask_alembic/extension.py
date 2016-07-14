@@ -1,8 +1,8 @@
 import logging
 import os
 import shutil
-
 import sys
+
 from alembic import util, autogenerate
 from alembic.config import Config
 from alembic.operations import Operations
@@ -10,7 +10,8 @@ from alembic.runtime.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
 from alembic.script.revision import ResolutionError
 from flask import current_app
-from flask._compat import iteritems, string_types
+
+from flask_alembic._compat import string_types, logger_has_handlers
 
 
 class Alembic(object):
@@ -41,7 +42,7 @@ class Alembic(object):
         sqlalchemy_logger = logging.getLogger('sqlalchemy')
         alembic_logger = logging.getLogger('alembic')
 
-        if not sqlalchemy_logger.hasHandlers():
+        if not logger_has_handlers(sqlalchemy_logger):
             sqlalchemy_logger.setLevel(logging.WARNING)
             sqlalchemy_logger.addHandler(console_handler)
 
@@ -49,7 +50,7 @@ class Alembic(object):
         if len(alembic_logger.handlers) == 1 and isinstance(alembic_logger.handlers[0], logging.NullHandler):
             alembic_logger.removeHandler(alembic_logger.handlers[0])
 
-        if not alembic_logger.hasHandlers():
+        if not logger_has_handlers(alembic_logger):
             alembic_logger.setLevel(logging.INFO)
             alembic_logger.addHandler(console_handler)
 
@@ -146,7 +147,7 @@ class Alembic(object):
             c.set_main_option('script_location', script_location)
             c.set_main_option('version_locations', ','.join(version_locations))
 
-            for key, value in iteritems(current_app.config['ALEMBIC']):
+            for key, value in current_app.config['ALEMBIC'].items():
                 if key in ('script_location', 'version_locations'):
                     continue
 
