@@ -36,30 +36,28 @@ You've created a Flask application and some models with Flask-SQLAlchemy.  Now s
     # Access the internals
     environment_context = alembic.env
 
-Commands are included for Click and Flask-Script::
+Commands are included for Click (Flask 0.11, or Flask-CLI)::
 
-    $ ./manage.py db revision "making changes"
-    $ ./manage.py db upgrade
+    $ flask db revision "making changes"
+    $ flask db upgrade
+
+and Flask-Script::
+
+    $ python manage.py db --help
 
 Differences from Alembic core
 -----------------------------
 
-*   Configuration is taken from Flask instead of alembic.ini.
-*   The migrations are stored directly in the migrations folder instead of the versions folder.
-*   The extension provides the migration environment instead of env.py.
-*   Does not (currently) support offline migrations.
+* Configuration is taken from ``Flask.config`` instead of ``alembic.ini``.
+* The migrations are stored directly in the migrations folder instead of the versions folder.
+* The extension provides the migration environment instead of ``env.py``.
+* Does not (currently) support offline migrations or multiple databases.
+* Adds a system for managing independent migration branches and makes it easier to work with named branches.
 
 Differences from Flask-Migrate
 ------------------------------
 
 `Flask-Migrate`_ is a simple wrapper around the existing Alembic commands.  It associates the Flask-SQLAlchemy database with Alembic, and wraps the Alembic commands with Flask-Script.  It still requires the standard Alembic file structure, does not integrate with Flask configuration, and does not expose the Alembic internals.
-
-TODO
-----
-
-*   See if ``db.session`` can be used rather than establishing new connections.
-*   Support multiple databases though Flask-SQLAlchemy's binds.
-*   Support offline migrations.
 
 .. _Flask: http://flask.pocoo.org/
 .. _Flask-SQLAlchemy: https://pythonhosted.org/Flask-SQLAlchemy/

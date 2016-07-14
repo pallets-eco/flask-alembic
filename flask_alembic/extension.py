@@ -16,22 +16,27 @@ class Alembic(object):
 
     If instantiated without an app instance, :meth:`init_app` is used to register an app at a later time.
 
-    :param app: call :meth:`init_app` on this app
-    :param run_mkdir: whether to run :meth:`mkdir` during :meth:`init_app`
+    :param app: call ``init_app`` on this app
+    :param run_mkdir: whether to run :meth:`mkdir` during ``init_app``
+    :param command_name: register a Click command with this name during ``init_app``, or skip if ``False``
     """
 
-    def __init__(self, app=None, run_mkdir=True):
+    def __init__(self, app=None, run_mkdir=True, command_name='db'):
         self._cache = {}
         self.run_mkdir = run_mkdir
+        self.command_name = command_name
 
         if app is not None:
             self.init_app(app, run_mkdir)
 
-    def init_app(self, app, run_mkdir=None):
+    def init_app(self, app, run_mkdir=None, command_name=None):
         """Register this extension on an app.  Will automatically set up migration directory by default.
+
+        Keyword arguments on this method override those set during :meth:`__init__` if not ``None``.
 
         :param app: app to register
         :param run_mkdir: whether to run :meth:`mkdir`
+        :param command_name: register a Click command with this name, or skip if ``False``
         """
 
         app.extensions['alembic'] = self
@@ -48,6 +53,10 @@ class Alembic(object):
         if run_mkdir or (run_mkdir is None and self.run_mkdir):
             with app.app_context():
                 self.mkdir()
+
+        if (command_name or (command_name is None and self.command_name)) and hasattr(app, 'cli'):
+            from flask_alembic import alembic_click
+            app.cli.add_command(alembic_click, command_name or self.command_name)
 
     def _clear_cache(self, exc=None):
         """Clear the cached objects for the given app.
@@ -128,7 +137,11 @@ class Alembic(object):
 
     @property
     def migration_context(self):
-        """Get the Alembic :class:`~alembic.migration.MigrationContext` for the current app."""
+        """Get the Alembic :class:`~alembic.migration.MigrationContext` for the current app.
+
+        Accessing this property opens a database connection but can't close it automatically.
+        Make sure to call ``migration_context.connection.close()`` when you're done.
+        """
 
         cache = self._get_cache()
 
@@ -146,7 +159,11 @@ class Alembic(object):
 
     @property
     def op(self):
-        """Get the Alembic :class:`~alembic.operations.Operations` context for the current app."""
+        """Get the Alembic :class:`~alembic.operations.Operations` context for the current app.
+
+        Accessing this property opens a database connection but can't close it automatically.
+        Make sure to call ``migration_context.connection.close()`` when you're done.
+        """
 
         cache = self._get_cache()
 

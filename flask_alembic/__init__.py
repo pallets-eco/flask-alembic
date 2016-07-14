@@ -11,3 +11,5 @@ flask_alembic
 """
 
 from flask_alembic.extension import Alembic
+from flask_alembic.cli.click import cli as alembic_click
+from flask_alembic.cli.script import manager as alembic_script

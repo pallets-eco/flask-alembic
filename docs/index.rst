@@ -14,8 +14,8 @@ The latest code is hosted on `BitBucket <source_>`_.  Install with pip::
 
     pip install https://bitbucket.org/davidism/flask-alembic/get/tip.zip
 
-.. _Flask: http://flask.pocoo.org/
-.. _Flask-SQLAlchemy: https://pythonhosted.org/Flask-SQLAlchemy/
+.. _Flask: https://palletsprojects.com/p/flask/
+.. _Flask-SQLAlchemy: https://flask-sqlalchemy.pocoo.org/
 .. _Alembic: https://alembic.readthedocs.org/en/latest/
 .. _release: https://pypi.python.org/pypi/Flask-Alembic
 .. _source: https://bitbucket.org/davidism/flask-alembic
@@ -30,8 +30,8 @@ Configuration for Alembic and its migrations is pulled from the following Flask 
 
 The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to the instance folder.
 
-.. _config: https://alembic.readthedocs.org/en/latest/tutorial.html#editing-the-ini-file
-.. _context: https://alembic.readthedocs.org/en/latest/api.html#alembic.environment.EnvironmentContext.configure
+.. _config: https://alembic.readthedocs.io/en/latest/tutorial.html#editing-the-ini-file
+.. _context: https://alembic.readthedocs.io/en/latest/api.html#alembic.environment.EnvironmentContext.configure
 
 Basic Usage
 -----------
@@ -50,7 +50,7 @@ When an app is registered, :meth:`~flask_alembic.Alembic.mkdir` is called to set
 The ``alembic`` instance provides an interface between the current app and Alembic.  It exposes similar commands to the command line available from Alembic, but Flask-Alembic's methods return data rather than produce output.  You can use this interface to do what the command line commands do, from inside your app. ::
 
     # generate a new revision
-    # same as ./manage.py db revision 'made changes'
+    # same as flask db revision 'made changes'
     alembic.revision('made changes')
 
     # run all available upgrades
@@ -64,34 +64,39 @@ You can also get at the Alembic internals that enable these commands.  See the `
     alembic.op.drop_column('my_table', 'my_column')  # probably don't want to do this outside a revision, but it'll work
     alembic.compare_metadata()  # see that that column you just dropped will be added back next revision
 
-.. _api: https://alembic.readthedocs.org/en/latest/api.html
+.. _api: https://alembic.readthedocs.io/en/latest/api.html
 
 Command Line
 ------------
 
-Currently, `Flask-Script`_ and `Click`_ are supported.  The commands are the same for either one.
+Currently, `Click`_ and `Flask-Script`_ are supported.  The commands are the same for either one.
+
+If you are using Flask 0.11, the preferred interface is Click.  If you are using Flask 0.10, you can use backported integration via `Flask-CLI`_.
+Flask-Alembic will automatically add the command to the cli if it detects that Click is available. ::
+
+    flask db --help
 
 If you have set up a :class:`flask_script.Manager` for your project using Flask-Script, you can add Alembic commands like this::
 
-    from flask_alembic.cli.script import manager as alembic_manager
+    from flask_alembic import alembic_script
     app_manager.add_command('db', alembic_manager)
 
-If you are using a newer Flask, the preferred interface is Click.  If you are using Flask 0.10, you can use backported integration via `Flask-CLI`_. ::
+::
 
-    from flask_alembic.cli.click import cli as alembic_cli
-    app.cli.add_command(alembic_cli, 'db')
+    python manage.py db
 
-.. _Flask-Script: https://flask-script.readthedocs.org/en/latest/
+.. _Flask-Script: https://flask-script.readthedocs.io/en/latest/
 .. _Click: http://click.pocoo.org/
-.. _Flask-CLI: http://flask-cli.readthedocs.org/en/latest/
+.. _Flask-CLI: https://flask-cli.readthedocs.io/en/latest/
 
 Differences from Alembic
 ------------------------
 
-*   Configuration is taken from Flask instead of alembic.ini.
-*   The migrations are stored directly in the migrations folder instead of the versions folder.
-*   The extension provides the migration environment instead of env.py.  If you want to change how migrations are run, subclass the extension and implement your own ``run_migrations`` method.
-*   Does not (currently) support offline migrations.
+* Configuration is taken from ``Flask.config`` instead of ``alembic.ini``.
+* The migrations are stored directly in the migrations folder instead of the versions folder.
+* The extension provides the migration environment instead of ``env.py``.
+* Does not (currently) support offline migrations or multiple databases.
+* Adds a system for managing independent migration branches and makes it easier to work with named branches.
 
 API Reference
 -------------
