@@ -28,7 +28,7 @@ Configuration for Alembic and its migrations is pulled from the following Flask 
 *   ``ALEMBIC`` is a dictionary containing general configuration, mostly used by :class:`alembic.config.Config` and :class:`alembic.script.ScriptDirectory`.  See Alembic's docs on `config`_.
 *   ``ALEMBIC_CONTEXT`` is a dictionary containing options passed to :class:`alembic.environment.EnvironmentContext` and :class:`alembic.migration.MigrationContext`.  See Alembic's docs on `context`_.
 
-The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to the instance folder.
+The only required configuration is ``ALEMBIC['script_location']``, which is the location of the migrations directory.  If it is not an absolute path, it will be relative to the instance folder.  This defaults to ``migrations`` relative to the application root.
 
 .. _config: http://alembic.zzzcomputing.com/en/latest/tutorial.html#editing-the-ini-file
 .. _context: http://alembic.zzzcomputing.com/en/latest/api/runtime.html#alembic.runtime.environment.EnvironmentContext.configure
@@ -62,9 +62,14 @@ You can also get at the Alembic internals that enable these commands.  See the `
     alembic.script.get_revision('head')  # locate a revision by name
     alembic.context.get_current_revision()  # could compare this to the 'head' revision above to see if upgrades are needed
     alembic.op.drop_column('my_table', 'my_column')  # probably don't want to do this outside a revision, but it'll work
-    alembic.compare_metadata()  # see that that column you just dropped will be added back next revision
+    alembic.compare_metadata()  # see that the column you just dropped will be added back next revision
 
 .. _api: http://alembic.zzzcomputing.com/en/latest/api/index.html
+
+Independent Named Branches
+--------------------------
+
+
 
 Command Line
 ------------
@@ -92,11 +97,19 @@ If you have set up a :class:`flask_script.Manager` for your project using Flask-
 Differences from Alembic
 ------------------------
 
-* Configuration is taken from ``Flask.config`` instead of ``alembic.ini``.
+Flask-Alembic is opinionated and was designed to enable specific workflows.  If you're looking for a more direct wrapper
+around Alembic, you may be interested in `Flask-Migrate`_ instead.
+
+* Configuration is taken from ``Flask.config`` instead of ``alembic.ini`` and ``env.py``.
 * The migrations are stored directly in the migrations folder instead of the versions folder.
-* The extension provides the migration environment instead of ``env.py``.
-* Does not (currently) support offline migrations or multiple databases.
+* Provides the migration environment instead of ``env.py`` and exposes Alembic's internal API objects.
+* Differentiates between CLI commands and Python functions.  The functions return revision objects and don't print to stdout.
+* Allows operating Alembic at any API level while the app is running, through the exposed objects and functions.
+* Does not (currently) support offline migrations.  I don't plan to add this but am open to patches.
+* Does not (currently) support multiple databases.  I plan on adding support for Flask-SQLAlchemy binds and external bases eventually, or am open to patches.
 * Adds a system for managing independent migration branches and makes it easier to work with named branches.
+
+.. _Flask-Migrate: https://flask-migrate.readthedocs.io
 
 API Reference
 -------------
