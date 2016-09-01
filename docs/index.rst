@@ -69,7 +69,31 @@ You can also get at the Alembic internals that enable these commands.  See the `
 Independent Named Branches
 --------------------------
 
+Alembic supports `named branches`_, but its syntax is hard to remember and verbose.  Flask-Alembic
+makes it easier by providing a central configuration for branch names and revision directories and
+simplifying the syntax to the ``revision`` command.
 
+Alembic allows configuration of multiple version locations.  ``version_locations`` is a list of directories to search for migration scripts.  Flask-Alembic extends this to allow tuples as well
+as strings in the list.  If a tuple is added, it specifies a ``(branch, directory)`` pair.  The ``script_location`` is automatically given the label ``default`` and added to the ``version_locations``. ::
+
+    ALEMBIC = {
+        'version_locations': [
+            'other_migrations',  # not a branch, just another search location
+            ('posts', '/path/to/posts_extension/migrations'),  # posts branch migrations will be placed here
+            ('users', 'users/migrations'),  # relative paths are relative to the application root
+        ]
+    }
+
+The ``revision`` command takes a ``--branch`` option (defaults to ``default``).  This takes the place
+of specifying ``--parent``, ``--label``, and ``--path``.  This will automatically start the branch from the base revision, label the revision correctly, and place the revisions in the correct location. ::
+
+    flask db revision --branch users 'create user model'
+    # equivalent to (if branch is new)
+    # alembic revision --autogenerate --head base --branch-label users --version-path users/migrations -m 'create user model'
+    # or (if branch exists)
+    # alembic revision --autogenerate --head users@head -m 'create user model'
+
+.. _named branches: http://alembic.zzzcomputing.com/en/latest/branches.html#working-with-multiple-bases
 
 Command Line
 ------------
