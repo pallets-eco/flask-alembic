@@ -453,7 +453,7 @@ class Alembic(object):
             label = [label]
 
         return self.script_directory.generate_revision(
-            rev_id=self.rev_id(),
+            revid=self.rev_id(),
             message=message,
             head=revisions,
             branch_labels=label,

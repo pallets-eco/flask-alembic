@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='Flask-Alembic',
-    version='2.0.0',
+    version='2.0.1',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
@@ -31,6 +31,6 @@ setup(
         'alembic>=0.8',
         'Flask>=0.10',
         'Flask-SQLAlchemy',
-        'SQLAlchemy'
+        'SQLAlchemy',
     ],
 )
