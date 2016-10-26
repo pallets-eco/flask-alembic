@@ -64,6 +64,11 @@ You can also get at the Alembic internals that enable these commands.  See the `
     alembic.op.drop_column('my_table', 'my_column')  # probably don't want to do this outside a revision, but it'll work
     alembic.compare_metadata()  # see that the column you just dropped will be added back next revision
 
+The functions require an app context.  If you're calling them outside a view, set up a context manually. ::
+
+    with app.app_context():
+        alembic.upgrade()
+
 .. _api: http://alembic.zzzcomputing.com/en/latest/api/index.html
 
 Independent Named Branches

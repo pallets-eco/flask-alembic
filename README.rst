@@ -27,14 +27,15 @@ You've created a Flask application and some models with Flask-SQLAlchemy.  Now s
     alembic = Alembic()
     alembic.init_app(app)
 
-    # Auto-generate a migration
-    alembic.revision('making changes')
+    with app.app_context():
+        # Auto-generate a migration
+        alembic.revision('making changes')
 
-    # Upgrade the database
-    alembic.upgrade()
+        # Upgrade the database
+        alembic.upgrade()
 
-    # Access the internals
-    environment_context = alembic.env
+        # Access the internals
+        environment_context = alembic.env
 
 Commands are included for Click (Flask 0.11, or Flask-CLI)::
 
