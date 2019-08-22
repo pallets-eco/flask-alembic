@@ -1,3 +1,2 @@
-include LICENSE.rst docs_require.txt
-recursive-include docs *
+graft docs
 prune docs/_build

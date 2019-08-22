@@ -1,25 +1,33 @@
 Flask-Alembic
 =============
 
-This `Flask`_ extension provides a configurable `Alembic`_ migration environment around a `Flask-SQLAlchemy`_ database.
+This `Flask`_ extension provides a configurable `Alembic`_ migration
+environment around a `Flask-SQLAlchemy`_ database.
 
-`Full documentation`_
+.. _Flask: https://palletsprojects.com/p/flask/
+.. _Flask-SQLAlchemy: http://flask-sqlalchemy.pocoo.org/
+.. _Alembic: https://alembic.zzzcomputing.com/en/latest/
+
 
 Installation
 ------------
 
-Install releases from `PyPI`_::
+Install and update using `pip`_:
 
-    pip install Flask-Alembic
+.. code-block:: text
 
-Install the latest code from `BitBucket`_::
+    $ pip install Flask-Alembic
 
-    pip install https://bitbucket.org/davidism/flask-alembic/get/default.tar.gz
+.. _pip: https://pip.pypa.io/en/stable/quickstart/
+
 
 Basic Usage
 -----------
 
-You've created a Flask application and some models with Flask-SQLAlchemy.  Now start using Flask-Alembic::
+You've created a Flask application and some models with
+Flask-SQLAlchemy. Now start using Flask-Alembic:
+
+.. code-block:: python
 
     from flask_alembic import Alembic
 
@@ -37,18 +45,24 @@ You've created a Flask application and some models with Flask-SQLAlchemy.  Now s
         # Access the internals
         environment_context = alembic.env
 
-Commands are included for Click (Flask 0.11, or Flask-CLI)::
+Commands are included for Click and the ``flask`` command:
 
+.. code-block:: text
+
+    $ flask db --help
     $ flask db revision "making changes"
     $ flask db upgrade
 
-and Flask-Script::
+and Flask-Script for legacy applications:
+
+.. code-block:: text
 
     $ python manage.py db --help
 
-.. _Flask: https://palletsprojects.com/p/flask/
-.. _Flask-SQLAlchemy: http://flask-sqlalchemy.pocoo.org/
-.. _Alembic: https://alembic.zzzcomputing.com/en/latest/
-.. _PyPI: https://pypi.python.org/pypi/Flask-Alembic
-.. _BitBucket: https://bitbucket.org/davidism/flask-alembic
-.. _Full documentation: https://flask-alembic.readthedocs.io/
+
+Links
+-----
+
+-   Documentation: https://flask-alembic.readthedocs.io/
+-   Releases: https://pypi.org/project/Flask-Alembic/
+-   Code: https://github.com/davidism/flask-alembic
