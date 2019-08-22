@@ -8,8 +8,9 @@ if not PY2:
     def logger_has_handlers(logger):
         return logger.hasHandlers()
 
+
 else:
-    string_types = (str, unicode)
+    string_types = (str, unicode)  # noqa F821
 
     # backported from PY3 logging.Logger.hasHandlers
     def logger_has_handlers(logger):

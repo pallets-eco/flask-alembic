@@ -9,15 +9,14 @@ flask_alembic
 .. automodule:: flask_alembic.cli
     :members:
 """
-
-from flask_alembic.extension import Alembic
+from .extension import Alembic
 
 try:
-    from flask_alembic.cli.click import cli as alembic_click
+    from .cli.click import cli as alembic_click
 except ImportError:
     alembic_click = None
 
 try:
-    from flask_alembic.cli.script import manager as alembic_script
+    from .cli.script import manager as alembic_script
 except ImportError:
     alembic_script = None
