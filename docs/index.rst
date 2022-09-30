@@ -193,4 +193,8 @@ you may be interested in `Flask-Migrate`_ instead.
 API Reference
 -------------
 
-.. automodule:: flask_alembic
+.. module:: flask_alembic
+
+.. autoclass:: Alembic
+    :members:
+    :member-order: bysource
