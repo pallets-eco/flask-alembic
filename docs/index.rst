@@ -62,7 +62,6 @@ call :meth:`~flask_alembic.Alembic.init_app` later.
 
 When an app is registered, :meth:`~flask_alembic.Alembic.mkdir` is
 called to set up the migrations directory if it does not already exist.
-To prevent this, call ``init_app`` with ``run_mkdir=False``.
 
 The ``alembic`` instance provides an interface between the current app
 and Alembic. It exposes similar commands to the command line available
@@ -153,34 +152,14 @@ revisions in the correct location.
 Command Line
 ------------
 
-Currently, `Click`_ and `Flask-Script`_ are supported. The commands are
-the same for either one. Flask-Script was deprecated in 2017, the
-preferred interface is Click.
-
-If you are using Flask >= 0.11, the preferred interface is Click. If you
-are using Flask 0.10, you can use backported integration via
-`Flask-CLI`_. Flask-Alembic will automatically add the command to the
-CLI if it detects that Click is available.
+Flask-Alembic automatically adds a ``db`` group of commands to the ``flask`` CLI. From
+there you can generate revisions, apply upgrades, etc.
 
 .. code-block:: text
 
     $ flask db --help
-
-If you have set up a :class:`flask_script.Manager` for your project
-using Flask-Script, you can add Alembic commands like this:
-
-.. code-block:: python
-
-    from flask_alembic import alembic_script
-    app_manager.add_command("db", alembic_manager)
-
-.. code-block:: text
-
-    $ python manage.py db
-
-.. _Click: https://palletsprojects.com/p/click/
-.. _Flask-Script: https://flask-script.readthedocs.io/en/latest/
-.. _Flask-CLI: https://flask-cli.readthedocs.io/en/latest/
+    $ flask db revision "making changes"
+    $ flask db upgrade
 
 
 Differences from Alembic

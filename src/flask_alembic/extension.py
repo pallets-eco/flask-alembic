@@ -86,12 +86,10 @@ class Alembic(object):
             with app.app_context():
                 self.mkdir()
 
-        if (command_name or (command_name is None and self.command_name)) and hasattr(
-            app, "cli"
-        ):
-            from flask_alembic import alembic_click
+        if command_name or (command_name is None and self.command_name):
+            from .cli import cli
 
-            app.cli.add_command(alembic_click, command_name or self.command_name)
+            app.cli.add_command(cli, command_name or self.command_name)
 
     def _clear_cache(self, exc=None):
         """Clear the cached Alembic objects for the given app.

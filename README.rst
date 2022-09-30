@@ -45,19 +45,13 @@ Flask-SQLAlchemy. Now start using Flask-Alembic:
         # Access the internals
         environment_context = alembic.env
 
-Commands are included for Click and the ``flask`` command:
+Commands are added to the ``flask`` CLI:
 
 .. code-block:: text
 
     $ flask db --help
     $ flask db revision "making changes"
     $ flask db upgrade
-
-and Flask-Script for legacy applications:
-
-.. code-block:: text
-
-    $ python manage.py db --help
 
 
 Links
