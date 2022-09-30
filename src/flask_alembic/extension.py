@@ -12,9 +12,6 @@ from alembic.script import ScriptDirectory
 from alembic.script.revision import ResolutionError
 from flask import current_app
 
-from ._compat import logger_has_handlers
-from ._compat import string_types
-
 
 class Alembic(object):
     """Provide an Alembic environment and migration API.
@@ -45,7 +42,7 @@ class Alembic(object):
         sqlalchemy_logger = logging.getLogger("sqlalchemy")
         alembic_logger = logging.getLogger("alembic")
 
-        if not logger_has_handlers(sqlalchemy_logger):
+        if not sqlalchemy_logger.hasHandlers():
             sqlalchemy_logger.setLevel(logging.WARNING)
             sqlalchemy_logger.addHandler(console_handler)
 
@@ -55,7 +52,7 @@ class Alembic(object):
         ):
             alembic_logger.removeHandler(alembic_logger.handlers[0])
 
-        if not logger_has_handlers(alembic_logger):
+        if not alembic_logger.hasHandlers():
             alembic_logger.setLevel(logging.INFO)
             alembic_logger.addHandler(console_handler)
 
@@ -145,7 +142,7 @@ class Alembic(object):
             version_locations = [script_location]
 
             for item in current_app.config["ALEMBIC"]["version_locations"]:
-                version_location = item if isinstance(item, string_types) else item[1]
+                version_location = item if isinstance(item, str) else item[1]
 
                 if not os.path.isabs(version_location) and ":" not in version_location:
                     version_location = os.path.join(
@@ -398,14 +395,14 @@ class Alembic(object):
         """
         if parent is None:
             parent = ["head"]
-        elif isinstance(parent, string_types):
+        elif isinstance(parent, str):
             parent = [parent]
         else:
             parent = [getattr(r, "revision", r) for r in parent]
 
         if label is None:
             label = []
-        elif isinstance(label, string_types):
+        elif isinstance(label, str):
             label = [label]
         else:
             label = list(label)
@@ -420,7 +417,7 @@ class Alembic(object):
                 branch_path = dict(
                     item
                     for item in current_app.config["ALEMBIC"]["version_locations"]
-                    if not isinstance(item, string_types)
+                    if not isinstance(item, str)
                 ).get(branch)
 
                 if branch_path:
@@ -488,7 +485,7 @@ class Alembic(object):
         """
         if not revisions:
             revisions = ["heads"]
-        elif isinstance(revisions, string_types):
+        elif isinstance(revisions, str):
             revisions = [revisions]
         else:
             revisions = [getattr(r, "revision", r) for r in revisions]
@@ -496,7 +493,7 @@ class Alembic(object):
         if message is None:
             message = "merge {0}".format(", ".join(revisions))
 
-        if isinstance(label, string_types):
+        if isinstance(label, str):
             label = [label]
 
         return self.script_directory.generate_revision(
