@@ -13,7 +13,7 @@ from alembic.script.revision import ResolutionError
 from flask import current_app
 
 
-class Alembic(object):
+class Alembic:
     """Provide an Alembic environment and migration API.
 
     If instantiated without an app instance, :meth:`init_app` is used to
@@ -204,7 +204,7 @@ class Alembic(object):
             env.configure(
                 connection=conn,
                 target_metadata=db.metadata,
-                **current_app.config["ALEMBIC_CONTEXT"]
+                **current_app.config["ALEMBIC_CONTEXT"],
             )
             cache["context"] = env.get_context()
 
@@ -246,7 +246,7 @@ class Alembic(object):
                 connection=connection,
                 target_metadata=db.metadata,
                 fn=fn,
-                **current_app.config["ALEMBIC_CONTEXT"]
+                **current_app.config["ALEMBIC_CONTEXT"],
             )
 
             with env.begin_transaction():
@@ -261,7 +261,7 @@ class Alembic(object):
         template_dest = os.path.join(script_dir, "script.py.mako")
 
         if not os.access(template_src, os.F_OK):
-            raise util.CommandError("Template {0} does not exist".format(template_src))
+            raise util.CommandError(f"Template {template_src} does not exist")
 
         if not os.access(script_dir, os.F_OK):
             os.makedirs(script_dir)
@@ -409,7 +409,7 @@ class Alembic(object):
         if branch:
             for i, item in enumerate(parent):
                 if item in ("base", "head"):
-                    parent[i] = "{}@{}".format(branch, item)
+                    parent[i] = f"{branch}@{item}"
 
             if not path:
                 branch_path = dict(
@@ -489,7 +489,7 @@ class Alembic(object):
             revisions = [getattr(r, "revision", r) for r in revisions]
 
         if message is None:
-            message = "merge {0}".format(", ".join(revisions))
+            message = f"merge {', '.join(revisions)}"
 
         if isinstance(label, str):
             label = [label]
