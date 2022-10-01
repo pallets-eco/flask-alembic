@@ -1,6 +1,0 @@
-click~=7.0
-Flask-Script~=2.0.6
-Pallets-Sphinx-Themes~=1.2.2
-Sphinx~=2.2.0
-sphinx-issues~=1.2.0
-sphinxcontrib-log-cabinet~=1.0.1

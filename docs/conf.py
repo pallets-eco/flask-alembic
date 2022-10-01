@@ -17,10 +17,10 @@ extensions = [
     "sphinxcontrib.log_cabinet",
     "sphinx_issues",
 ]
+autodoc_typehints = "description"
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "alembic": ("https://alembic.sqlalchemy.org/en/latest/", None),
-    "flask_script": ("https://flask-script.readthedocs.io/en/latest/", None),
 }
 issues_github_path = "davidism/flask-alembic"
 
@@ -29,7 +29,6 @@ issues_github_path = "davidism/flask-alembic"
 html_theme = "flask"
 html_context = {
     "project_links": [
-        ProjectLink("Donate to Flask", "https://www.palletsprojects.com/donate"),
         ProjectLink("PyPI Releases", "https://pypi.org/project/Flask-Alembic/"),
         ProjectLink("Source Code", "https://github.com/davidism/flask-alembic"),
         ProjectLink(
