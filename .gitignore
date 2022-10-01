@@ -1,6 +1,9 @@
 /.idea/
 /.vscode/
+.pdm.toml
+/.env/
 /env/
+/.venv/
 /venv/
 __pycache__/
 *.pyc
@@ -8,6 +11,7 @@ __pycache__/
 /build/
 /dist/
 /.pytest_cache/
+/.mypy_cache/
 /.tox/
 .coverage
 /htmlcov/

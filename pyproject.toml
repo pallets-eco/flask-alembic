@@ -1,0 +1,97 @@
+[project]
+name = "Flask-Alembic"
+version = "3.0.0.dev"
+description = "Flask extension to integrate Alembic with Flask-SQLAlchemy."
+readme = "README.rst"
+license = { text = "BSD-3-Clause" }
+authors = [{name = "David Lord", email = "davidism@gmail.com"},]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Database",
+]
+requires-python = ">=3.7"
+dependencies = [
+    "alembic>=0.8",
+    "flask>=0.10",
+    "flask-sqlalchemy",
+    "sqlalchemy",
+]
+
+[project.urls]
+Documentation = "https://flask-alembic.readthedocs.io"
+Changes = "https://flask-alembic.readthedocs.io/#changes"
+"Source Code" = "https://github.com/davidism/flask-alembic/"
+"Issue Tracker" = "https://github.com/davidism/flask-alembic/issues/"
+
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
+
+[tool.pdm.dev-dependencies]
+tests = [
+    "pytest",
+]
+coverage = [
+    "pytest-cov",
+    "coverage[toml]",
+]
+mypy = [
+    "mypy",
+    "pytest",
+]
+docs = [
+    "sphinx",
+    "pallets-sphinx-themes",
+    "sphinx-issues",
+    "sphinxcontrib-log-cabinet",
+]
+pre-commit = [
+    "pre-commit",
+]
+tox = [
+    "tox",
+    "tox-pdm",
+]
+
+[tool.pdm.build]
+source-includes = [
+    "docs/",
+    "tests/",
+    "CHANGES.rst",
+    "pdm.lock",
+    "tox.ini",
+]
+excludes = [
+    "docs/_build",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+branch = true
+source = ["flask_alembic", "tests"]
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+
+[tool.mypy]
+python_version = "3.7"
+files = ["src/flask_alembic", "tests"]
+show_error_codes = true
+pretty = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+    "cryptography.*",
+    "importlib_metadata.*",
+]
+ignore_missing_imports = true
