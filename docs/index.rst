@@ -1,173 +1,28 @@
 Flask-Alembic
 =============
 
-Flask-Alembic is a `Flask`_ extension that provides a configurable
-`Alembic`_ migration environment around a `Flask-SQLAlchemy`_ database.
-
-
-Installation
-------------
-
-Install with pip:
-
-.. code-block:: text
-
-    $ pip install Flask-Alembic
+Flask-Alembic is a `Flask`_ extension that provides a configurable `Alembic`_ migration
+environment around a `Flask-SQLAlchemy`_ database.
 
 .. _Flask: https://palletsprojects.com/p/flask/
 .. _Flask-SQLAlchemy: https://flask-sqlalchemy.palletsprojects.com/
 .. _Alembic: https://alembic.sqlalchemy.org/en/latest/
 
 
-Configuration
--------------
-
-Configuration for Alembic and its migrations is pulled from the
-following Flask config keys.
-
--   ``ALEMBIC`` is a dictionary containing general configuration, mostly
-    used by :class:`~alembic.config.Config` and
-    :class:`~alembic.script.ScriptDirectory`. See Alembic's docs on
-    `config <alembic-config_>`_.
--   ``ALEMBIC_CONTEXT`` is a dictionary containing options passed to
-    :class:`~alembic.runtime.environment.EnvironmentContext` and
-    :class:`~alembic.runtime.migration.MigrationContext`. See Alembic's
-    docs on `runtime <alembic-runtime_>`_.
-
-The only required configuration is ``ALEMBIC["script_location"]``, which
-is the location of the migrations directory. If it is not an absolute
-path, it will be relative to the instance folder. This defaults to
-``migrations`` relative to the application root.
-
-.. _alembic-config: https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
-.. _alembic-runtime: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#runtime-objects
-
-
-Basic Usage
------------
-
-First, set up your Flask app (or app factory) and the Flask-SQLAlchemy
-extension and models.
-
-This extension follows the common pattern of Flask extension setup.
-Either immediately pass an app to :class:`~flask_alembic.Alembic`, or
-call :meth:`~flask_alembic.Alembic.init_app` later.
-
-.. code-block:: python
-
-    from flask_alembic import Alembic
-
-    alembic = Alembic()
-    alembic.init_app(app)  # call in the app factory if you're using that pattern
-
-When an app is registered, :meth:`~flask_alembic.Alembic.mkdir` is
-called to set up the migrations directory if it does not already exist.
-
-The ``alembic`` instance provides an interface between the current app
-and Alembic. It exposes similar commands to the command line available
-from Alembic, but Flask-Alembic's methods return data rather than
-produce output. You can use this interface to do what the command line
-commands do, from inside your app.
-
-.. code-block:: python
-
-    # generate a new revision
-    # same as flask db revision 'made changes'
-    alembic.revision('made changes')
-
-    # run all available upgrades
-    # same as ./manage.py db upgrade
-    alembic.upgrade()
-
-You can also get at the Alembic internals that enable these commands.
-See the `Alembic API docs <alembic-api_>`_ for more information.
-
-.. code-block:: python
-
-    # locate a revision by name
-    alembic.script.get_revision("head")
-    # could compare this to the 'head' revision above to see if upgrades are needed
-    alembic.context.get_current_revision()
-    # probably don't want to do this outside a revision, but it'll work
-    alembic.op.drop_column("my_table", "my_column")
-    # see that the column you just dropped will be added back next revision
-    alembic.compare_metadata()
-
-The functions require an app context. If you're calling them outside a
-view, set up a context manually.
-
-.. code-block:: python
-
-    with app.app_context():
-        alembic.upgrade()
-
-.. _alembic-api: https://alembic.sqlalchemy.org/en/latest/api/index.html
-
-
-Independent Named Branches
---------------------------
-
-Alembic supports `named branches`_, but its syntax is hard to remember
-and verbose. Flask-Alembic makes it easier by providing a central
-configuration for branch names and revision directories and simplifying
-the syntax to the ``revision`` command.
-
-Alembic allows configuration of multiple version locations.
-``version_locations`` is a list of directories to search for migration
-scripts. Flask-Alembic extends this to allow tuples as well as strings
-in the list. If a tuple is added, it specifies a ``(branch, directory)``
-pair. The ``script_location`` is automatically given the label
-``default`` and added to the ``version_locations``.
-
-.. code-block:: python
-
-    ALEMBIC = {
-        "version_locations": [
-            # not a branch, just another search location
-            "other_migrations",
-            # posts branch migrations will be placed here
-            ("posts", "/path/to/posts_extension/migrations"),
-            # relative paths are relative to the application root
-            ("users", "users/migrations"),
-        ]
-    }
-
-The ``revision`` command takes a ``--branch`` option (defaults to
-``default``). This takes the place of specifying ``--parent``,
-``--label``, and ``--path``. This will automatically start the branch
-from the base revision, label the revision correctly, and place the
-revisions in the correct location.
-
-.. code-block:: text
-
-    $ flask db revision --branch users 'create user model'
-    # equivalent to (if branch is new)
-    # alembic revision --autogenerate --head base --branch-label users --version-path users/migrations -m 'create user model'
-    # or (if branch exists)
-    # alembic revision --autogenerate --head users@head -m 'create user model'
-
-.. _named branches: https://alembic.sqlalchemy.org/en/latest/branches.html#working-with-multiple-bases
-
-
-Command Line
+Installation
 ------------
 
-Flask-Alembic automatically adds a ``db`` group of commands to the ``flask`` CLI. From
-there you can generate revisions, apply upgrades, etc.
+Install from `PyPI`_:
 
 .. code-block:: text
 
-    $ flask db --help
-    $ flask db revision "making changes"
-    $ flask db upgrade
+    $ pip install Flask-Alembic
+
+.. _PyPI: https://pypi.org/project/Flask-Alembic
 
 
 Differences from Alembic
 ------------------------
-
-Flask-Alembic is opinionated and was designed to enable specific
-workflows. If you're looking for a more direct wrapper around Alembic,
-you may be interested in `Flask-Migrate`_ instead.
 
 -   Configuration is taken from ``Flask.config`` instead of
     ``alembic.ini`` and ``env.py``.
@@ -187,14 +42,36 @@ you may be interested in `Flask-Migrate`_ instead.
 -   Adds a system for managing independent migration branches and makes
     it easier to work with named branches.
 
-.. _Flask-Migrate: https://flask-migrate.readthedocs.io/en/latest/
+
+User Guide
+----------
+
+.. toctree::
+    :maxdepth: 2
+
+    use
+    config
+    branches
 
 
 API Reference
 -------------
 
-.. module:: flask_alembic
+.. toctree::
+    :maxdepth: 2
 
-.. autoclass:: Alembic
-    :members:
-    :member-order: bysource
+    api
+
+
+Additional Information
+----------------------
+
+.. toctree::
+    :maxdepth: 1
+
+    license
+
+.. toctree::
+    :maxdepth: 2
+
+    changes
