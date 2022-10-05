@@ -1,0 +1,78 @@
+Version 3.0.0
+-------------
+
+Unreleased
+
+-   Minimum supported version of Python is 3.7. Drop support for Python 2.
+-   Drop support for Flask-Script.
+
+
+Version 2.0.1
+-------------
+
+Released 2016-08-31
+
+-   Fix ``merge`` command.
+
+
+Version 2.0.0
+--------------
+
+Released 2016-07-14
+
+-   Support Alembic 0.8.
+-   Automatically register Click group.
+-   Allow customizing revision id.
+-   Configure Alembic and SQLAlchemy loggers.
+-   Update Python 2 and 3 compatibility.
+-   Don't require Flask-Script.
+
+
+Version 1.2.1
+-------------
+
+Released 2015-08-26
+
+-   Support Flask-Click for Flask 0.10.
+
+
+Version 1.2.0
+-------------
+
+Released 2015-08-13
+
+-   Fix Python 2 compatibility.
+-   Commands output revision information consistently.
+-   Default branch gets "default" label.
+-   Restrict to Alembic < 0.8 until compatibility can be addressed.
+
+
+Version 1.1.0
+-------------
+
+Released 2014-12-15
+
+-   Add independent named branches feature.
+-   Commands default to working on all heads.
+
+
+Version 1.0.2
+-------------
+
+Released 2014-08-26
+
+-   Fix Flask app context for Click CLI.
+
+
+Version 1.0.1
+-------------
+
+Released 2014-08-26
+
+-   Python 3 compatibility.
+
+
+Version 1.0.0
+-------------
+
+Released 2014-06-16
