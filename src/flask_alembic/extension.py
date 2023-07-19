@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 
+import flask_sqlalchemy
 from alembic import autogenerate
 from alembic import util
 from alembic.config import Config
@@ -198,7 +199,7 @@ class Alembic:
         cache = self._get_cache()
 
         if "context" not in cache:
-            db = current_app.extensions["sqlalchemy"].db
+            db = self.flask_sqlalchemy_db
             env = self.environment_context
             conn = db.engine.connect()
             env.configure(
@@ -238,7 +239,7 @@ class Alembic:
         :param kwargs: Extra arguments passed to ``upgrade`` or
             ``downgrade`` in each revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = self.flask_sqlalchemy_db
         env = self.environment_context
 
         with db.engine.connect() as connection:
@@ -506,12 +507,21 @@ class Alembic:
         """Generate the :class:`~alembic.autogenerate.MigrationScript`
         object that would generate a new revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = self.flask_sqlalchemy_db
         return autogenerate.produce_migrations(self.migration_context, db.metadata)
 
     def compare_metadata(self):
         """Generate a list of operations that would be present in a new
         revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = self.flask_sqlalchemy_db
         return autogenerate.compare_metadata(self.migration_context, db.metadata)
+
+    @property
+    def flask_sqlalchemy_db(self):
+        ext_version = tuple(int(_) for _ in flask_sqlalchemy.__version__.split(".")[:3])
+
+        if ext_version >= (3, 1, 0):
+            return current_app.extensions["sqlalchemy"]
+
+        return current_app.extensions["sqlalchemy"].db
