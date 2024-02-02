@@ -33,32 +33,6 @@ Changes = "https://flask-alembic.readthedocs.io/#changes"
 requires = ["pdm-pep517>=1.0.0"]
 build-backend = "pdm.pep517.api"
 
-[tool.pdm.dev-dependencies]
-tests = [
-    "pytest",
-]
-coverage = [
-    "pytest-cov",
-    "coverage[toml]",
-]
-mypy = [
-    "mypy",
-    "pytest",
-]
-docs = [
-    "sphinx",
-    "pallets-sphinx-themes",
-    "sphinx-issues",
-    "sphinxcontrib-log-cabinet",
-]
-pre-commit = [
-    "pre-commit",
-]
-tox = [
-    "tox",
-    "tox-pdm",
-]
-
 [tool.pdm.build]
 source-includes = [
     "docs/",
