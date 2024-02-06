@@ -1,1 +1,5 @@
-.. include:: ../LICENSE.rst
+MIT License
+===========
+
+.. literalinclude:: ../LICENSE.txt
+    :language: text
