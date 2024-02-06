@@ -30,20 +30,11 @@ Changes = "https://flask-alembic.readthedocs.io/#changes"
 "Issue Tracker" = "https://github.com/davidism/flask-alembic/issues/"
 
 [build-system]
-requires = ["pdm-pep517>=1.0.0"]
-build-backend = "pdm.pep517.api"
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
 
-[tool.pdm.build]
-source-includes = [
-    "docs/",
-    "tests/",
-    "CHANGES.rst",
-    "pdm.lock",
-    "tox.ini",
-]
-excludes = [
-    "docs/_build",
-]
+[tool.flit.module]
+name = "flask_alembic"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
