@@ -26,9 +26,8 @@ dependencies = [
 
 [project.urls]
 Documentation = "https://flask-alembic.readthedocs.io"
-Changes = "https://flask-alembic.readthedocs.io/#changes"
-"Source Code" = "https://github.com/davidism/flask-alembic/"
-"Issue Tracker" = "https://github.com/davidism/flask-alembic/issues/"
+Changes = "https://flask-alembic.readthedocs.io/changes/"
+Source = "https://github.com/davidism/flask-alembic/"
 
 [build-system]
 requires = ["flit_core<4"]
