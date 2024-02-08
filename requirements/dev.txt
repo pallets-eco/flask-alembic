@@ -68,7 +68,10 @@ mypy-extensions==1.0.0
     #   -r typing.txt
     #   mypy
 nodeenv==1.8.0
-    # via pre-commit
+    # via
+    #   -r typing.txt
+    #   pre-commit
+    #   pyright
 packaging==23.2
     # via
     #   -r docs.txt
@@ -99,6 +102,8 @@ pygments==2.17.2
     #   sphinx
 pyproject-api==1.6.1
     # via tox
+pyright==1.1.350
+    # via -r typing.txt
 pytest==8.0.0
     # via
     #   -r tests.txt
