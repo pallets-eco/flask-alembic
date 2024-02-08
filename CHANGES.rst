@@ -10,6 +10,7 @@ Unreleased
 -   Minimum supported version of Alembic is 1.13.
 -   Drop support for Flask-Script.
 -   Add type annotations.
+-   Adding the CLI is skipped if ``command_name`` is empty rather than ``False``.
 
 
 Version 2.0.1

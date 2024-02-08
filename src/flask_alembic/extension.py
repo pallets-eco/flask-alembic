@@ -33,18 +33,18 @@ class Alembic:
     :param app: Call ``init_app`` on this app.
     :param run_mkdir: Run :meth:`mkdir` during ``init_app``.
     :param command_name: Register a Click command with this name during
-        ``init_app``, or skip if ``False``.
+        ``init_app``, unless it is the empty string.
     """
 
     def __init__(
         self,
         app: Flask | None = None,
         run_mkdir: bool = True,
-        command_name: str | bool = "db",
+        command_name: str = "db",
     ):
         self._cache: dict[Flask, dict[str, t.Any]] = {}
         self.run_mkdir: bool = run_mkdir
-        self.command_name: str | bool = command_name
+        self.command_name: str = command_name
 
         # add logging handler if not configured
         console_handler = logging.StreamHandler(sys.stderr)
@@ -76,7 +76,7 @@ class Alembic:
         self,
         app: Flask,
         run_mkdir: bool | None = None,
-        command_name: str | bool | None = None,
+        command_name: str | None = None,
     ) -> None:
         """Register this extension on an app. Will automatically set up
         migration directory by default.
@@ -86,8 +86,8 @@ class Alembic:
 
         :param app: App to register.
         :param run_mkdir: Run :meth:`mkdir` automatically.
-        :param command_name: Register a Click command with this name, or
-            skip if ``False``.
+        :param command_name: Register a Click command with this name, unless it
+            is the empty string.
         """
         app.extensions["alembic"] = self
 
@@ -109,7 +109,7 @@ class Alembic:
 
             app.cli.add_command(
                 cli,
-                command_name or self.command_name,  # type: ignore[arg-type]
+                command_name or self.command_name,
             )
 
     def _clear_cache(self, exc: BaseException | None = None) -> None:
