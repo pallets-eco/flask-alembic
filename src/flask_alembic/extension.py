@@ -1,16 +1,24 @@
+from __future__ import annotations
+
 import logging
 import os
 import shutil
 import sys
+import typing as t
 
 from alembic import autogenerate
 from alembic import util
 from alembic.config import Config
+from alembic.operations import MigrationScript
 from alembic.operations import Operations
 from alembic.runtime.environment import EnvironmentContext
+from alembic.runtime.migration import MigrationContext
+from alembic.runtime.migration import MigrationStep
+from alembic.script import Script
 from alembic.script import ScriptDirectory
 from alembic.script.revision import ResolutionError
 from flask import current_app
+from flask import Flask
 
 
 class Alembic:
@@ -28,10 +36,15 @@ class Alembic:
         ``init_app``, or skip if ``False``.
     """
 
-    def __init__(self, app=None, run_mkdir=True, command_name="db"):
-        self._cache = {}
-        self.run_mkdir = run_mkdir
-        self.command_name = command_name
+    def __init__(
+        self,
+        app: Flask | None = None,
+        run_mkdir: bool = True,
+        command_name: str | bool = "db",
+    ):
+        self._cache: dict[Flask, dict[str, t.Any]] = {}
+        self.run_mkdir: bool = run_mkdir
+        self.command_name: str | bool = command_name
 
         # add logging handler if not configured
         console_handler = logging.StreamHandler(sys.stderr)
@@ -59,7 +72,12 @@ class Alembic:
         if app is not None:
             self.init_app(app, run_mkdir)
 
-    def init_app(self, app, run_mkdir=None, command_name=None):
+    def init_app(
+        self,
+        app: Flask,
+        run_mkdir: bool | None = None,
+        command_name: str | bool | None = None,
+    ) -> None:
         """Register this extension on an app. Will automatically set up
         migration directory by default.
 
@@ -89,9 +107,12 @@ class Alembic:
         if command_name or (command_name is None and self.command_name):
             from .cli import cli
 
-            app.cli.add_command(cli, command_name or self.command_name)
+            app.cli.add_command(
+                cli,
+                command_name or self.command_name,  # type: ignore[arg-type]
+            )
 
-    def _clear_cache(self, exc=None):
+    def _clear_cache(self, exc: BaseException | None = None) -> None:
         """Clear the cached Alembic objects for the given app.
 
         This is called automatically during app context teardown.
@@ -105,11 +126,11 @@ class Alembic:
 
         cache.clear()
 
-    def _get_cache(self):
+    def _get_cache(self) -> dict[str, t.Any]:
         """Get the cache of Alembic objects for the current app."""
-        return self._cache[current_app._get_current_object()]
+        return self._cache[current_app._get_current_object()]  # type: ignore[attr-defined]
 
-    def rev_id(self):
+    def rev_id(self) -> str:
         """Generate a unique id for a revision.
 
         By default this uses :func:`alembic.util.rev_id`. Override this
@@ -123,7 +144,7 @@ class Alembic:
         return util.rev_id()
 
     @property
-    def config(self):
+    def config(self) -> Config:
         """Get the Alembic :class:`~alembic.config.Config` for the
         current app.
         """
@@ -158,10 +179,10 @@ class Alembic:
 
                 c.set_main_option(key, value)
 
-        return cache["config"]
+        return cache["config"]  # type: ignore[no-any-return]
 
     @property
-    def script_directory(self):
+    def script_directory(self) -> ScriptDirectory:
         """Get the Alembic
         :class:`~alembic.script.ScriptDirectory` for the current app.
         """
@@ -170,10 +191,10 @@ class Alembic:
         if "script" not in cache:
             cache["script"] = ScriptDirectory.from_config(self.config)
 
-        return cache["script"]
+        return cache["script"]  # type: ignore[no-any-return]
 
     @property
-    def environment_context(self):
+    def environment_context(self) -> EnvironmentContext:
         """Get the Alembic
         :class:`~alembic.runtime.environment.EnvironmentContext` for the
         current app.
@@ -183,10 +204,10 @@ class Alembic:
         if "env" not in cache:
             cache["env"] = EnvironmentContext(self.config, self.script_directory)
 
-        return cache["env"]
+        return cache["env"]  # type: ignore[no-any-return]
 
     @property
-    def migration_context(self):
+    def migration_context(self) -> MigrationContext:
         """Get the Alembic
         :class:`~alembic.runtime.migration.MigrationContext` for the
         current app.
@@ -208,10 +229,10 @@ class Alembic:
             )
             cache["context"] = env.get_context()
 
-        return cache["context"]
+        return cache["context"]  # type: ignore[no-any-return]
 
     @property
-    def op(self):
+    def op(self) -> Operations:
         """Get the Alembic :class:`~alembic.operations.Operations`
         context for the current app.
 
@@ -224,9 +245,15 @@ class Alembic:
         if "op" not in cache:
             cache["op"] = Operations(self.migration_context)
 
-        return cache["op"]
+        return cache["op"]  # type: ignore[no-any-return]
 
-    def run_migrations(self, fn, **kwargs):
+    def run_migrations(
+        self,
+        fn: t.Callable[
+            [str | list[str] | tuple[str, ...], MigrationContext], list[MigrationStep]
+        ],
+        **kwargs: t.Any,
+    ) -> None:
         """Configure an Alembic
         :class:`~alembic.runtime.migration.MigrationContext` to run
         migrations for the given function.
@@ -252,9 +279,10 @@ class Alembic:
             with env.begin_transaction():
                 env.run_migrations(**kwargs)
 
-    def mkdir(self):
+    def mkdir(self) -> None:
         """Create the script directory and template."""
         script_dir = self.config.get_main_option("script_location")
+        assert script_dir is not None
         template_src = os.path.join(
             self.config.get_template_directory(), "generic", "script.py.mako"
         )
@@ -273,13 +301,13 @@ class Alembic:
             if not os.access(version_location, os.F_OK):
                 os.makedirs(version_location)
 
-    def current(self):
+    def current(self) -> tuple[Script, ...]:
         """Get the list of current revisions."""
         return self.script_directory.get_revisions(
             self.migration_context.get_current_heads()
         )
 
-    def heads(self, resolve_dependencies=False):
+    def heads(self, resolve_dependencies: bool = False) -> tuple[Script, ...]:
         """Get the list of revisions that have no child revisions.
 
         :param resolve_dependencies: Treat dependencies as down
@@ -290,7 +318,7 @@ class Alembic:
 
         return self.script_directory.get_revisions(self.script_directory.get_heads())
 
-    def branches(self):
+    def branches(self) -> list[Script]:
         """Get the list of revisions that have more than one next
         revision.
         """
@@ -300,7 +328,9 @@ class Alembic:
             if revision.is_branch_point
         ]
 
-    def log(self, start="base", end="heads"):
+    def log(
+        self, start: str | Script = "base", end: str | Script = "heads"
+    ) -> list[Script]:
         """Get the list of revisions in the order they will run.
 
         :param start: Only get entries since this revision.
@@ -322,19 +352,21 @@ class Alembic:
 
         return list(self.script_directory.walk_revisions(start, end))
 
-    def stamp(self, target="heads"):
+    def stamp(self, target: str | Script | list[str | Script] = "heads") -> None:
         """Set the current database revision without running migrations.
 
         :param target: Revision to set to.
         """
         target = "heads" if target is None else getattr(target, "revision", target)
 
-        def do_stamp(revision, context):
-            return self.script_directory._stamp_revs(target, revision)
+        def do_stamp(
+            revision: str | list[str] | tuple[str, ...], context: MigrationContext
+        ) -> list[MigrationStep]:
+            return self.script_directory._stamp_revs(target, revision)  # type: ignore[return-value]
 
         self.run_migrations(do_stamp)
 
-    def upgrade(self, target="heads"):
+    def upgrade(self, target: int | str | Script = "heads") -> None:
         """Run migrations to upgrade database.
 
         :param target: Revision to go up to.
@@ -342,12 +374,14 @@ class Alembic:
         target = "heads" if target is None else getattr(target, "revision", target)
         target = str(target)
 
-        def do_upgrade(revision, context):
-            return self.script_directory._upgrade_revs(target, revision)
+        def do_upgrade(
+            revision: str | list[str] | tuple[str, ...], context: MigrationContext
+        ) -> list[MigrationStep]:
+            return self.script_directory._upgrade_revs(target, revision)  # type: ignore[return-value]
 
         self.run_migrations(do_upgrade)
 
-    def downgrade(self, target=-1):
+    def downgrade(self, target: int | str | Script = -1) -> None:
         """Run migrations to downgrade database.
 
         :param target: Revision to go down to.
@@ -362,22 +396,24 @@ class Alembic:
 
         target = str(target)
 
-        def do_downgrade(revision, context):
-            return self.script_directory._downgrade_revs(target, revision)
+        def do_downgrade(
+            revision: str | list[str] | tuple[str, ...], context: MigrationContext
+        ) -> list[MigrationStep]:
+            return self.script_directory._downgrade_revs(target, revision)  # type: ignore[return-value]
 
         self.run_migrations(do_downgrade)
 
     def revision(
         self,
-        message,
-        empty=False,
-        branch="default",
-        parent="head",
-        splice=False,
-        depend=None,
-        label=None,
-        path=None,
-    ):
+        message: str,
+        empty: bool = False,
+        branch: str = "default",
+        parent: str | Script | list[str | Script] = "head",
+        splice: bool = False,
+        depend: str | Script | list[str | Script] | None = None,
+        label: str | list[str] | None = None,
+        path: str | None = None,
+    ) -> list[Script | None]:
         """Create a new revision. By default, auto-generate operations
         by comparing models and database.
 
@@ -457,7 +493,9 @@ class Alembic:
             },
         )
 
-        def do_revision(revision, context):
+        def do_revision(
+            revision: str | list[str] | tuple[str, ...], context: MigrationContext
+        ) -> list[MigrationStep]:
             if empty:
                 revision_context.run_no_autogenerate(revision, context)
             else:
@@ -472,7 +510,12 @@ class Alembic:
 
         return list(revision_context.generate_scripts())
 
-    def merge(self, revisions="heads", message=None, label=None):
+    def merge(
+        self,
+        revisions: str | Script | list[str | Script] = "heads",
+        message: str | None = None,
+        label: str | list[str] | None = None,
+    ) -> Script | None:
         """Create a merge revision.
 
         :param revisions: Revisions to merge.
@@ -502,16 +545,16 @@ class Alembic:
             config=self.config,
         )
 
-    def produce_migrations(self):
+    def produce_migrations(self) -> MigrationScript:
         """Generate the :class:`~alembic.autogenerate.MigrationScript`
         object that would generate a new revision.
         """
         db = current_app.extensions["sqlalchemy"].db
         return autogenerate.produce_migrations(self.migration_context, db.metadata)
 
-    def compare_metadata(self):
+    def compare_metadata(self) -> list[tuple[t.Any, ...]]:
         """Generate a list of operations that would be present in a new
         revision.
         """
         db = current_app.extensions["sqlalchemy"].db
-        return autogenerate.compare_metadata(self.migration_context, db.metadata)
+        return autogenerate.compare_metadata(self.migration_context, db.metadata)  # type: ignore[no-any-return]

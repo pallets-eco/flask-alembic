@@ -9,6 +9,7 @@ Unreleased
 -   Minimum supported version of Flask-SQLAlchemy is 3.0.
 -   Minimum supported version of Alembic is 1.13.
 -   Drop support for Flask-Script.
+-   Add type annotations.
 
 
 Version 2.0.1
