@@ -214,7 +214,7 @@ class Alembic:
         cache = self._get_cache()
 
         if cache.context is None:
-            db = current_app.extensions["sqlalchemy"].db
+            db = current_app.extensions["sqlalchemy"]
             env = self.environment_context
             conn = db.engine.connect()
             env.configure(
@@ -260,7 +260,7 @@ class Alembic:
         :param kwargs: Extra arguments passed to ``upgrade`` or
             ``downgrade`` in each revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = current_app.extensions["sqlalchemy"]
         env = self.environment_context
 
         with db.engine.connect() as connection:
@@ -543,14 +543,14 @@ class Alembic:
         """Generate the :class:`~alembic.autogenerate.MigrationScript`
         object that would generate a new revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = current_app.extensions["sqlalchemy"]
         return autogenerate.produce_migrations(self.migration_context, db.metadata)
 
     def compare_metadata(self) -> list[tuple[t.Any, ...]]:
         """Generate a list of operations that would be present in a new
         revision.
         """
-        db = current_app.extensions["sqlalchemy"].db
+        db = current_app.extensions["sqlalchemy"]
         return autogenerate.compare_metadata(self.migration_context, db.metadata)  # type: ignore[no-any-return]
 
 
