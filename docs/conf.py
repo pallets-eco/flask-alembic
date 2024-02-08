@@ -1,45 +1,54 @@
-from pallets_sphinx_themes import get_version
-from pallets_sphinx_themes import ProjectLink
+import importlib.metadata
 
 # Project --------------------------------------------------------------
 
 project = "Flask-Alembic"
-copyright = "2015 David Lord"
-author = "David Lord"
-release, version = get_version("Flask-Alembic")
+version = release = importlib.metadata.version(project).partition(".dev")[0]
 
 # General --------------------------------------------------------------
 
+default_role = "code"
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "pallets_sphinx_themes",
+    "myst_parser",
     "sphinxcontrib.log_cabinet",
-    "sphinx_issues",
 ]
+autodoc_member_order = "bysource"
+autodoc_default_options = {"members": None}
 autodoc_typehints = "description"
+autodoc_preserve_defaults = True
+extlinks = {
+    "issue": ("https://github.com/davidism/flask-alembic/issues/%s", "#%s"),
+    "pr": ("https://github.com/davidism/flask-alembic/pull/%s", "#%s"),
+}
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "alembic": ("https://alembic.sqlalchemy.org/en/latest/", None),
 }
-issues_github_path = "davidism/flask-alembic"
+myst_enable_extensions = [
+    "fieldlist",
+]
+myst_heading_anchors = 2
 
 # HTML -----------------------------------------------------------------
 
-html_theme = "flask"
-html_context = {
-    "project_links": [
-        ProjectLink("PyPI Releases", "https://pypi.org/project/Flask-Alembic/"),
-        ProjectLink("Source Code", "https://github.com/davidism/flask-alembic"),
-        ProjectLink(
-            "Issue Tracker", "https://github.com/davidism/flask-alembic/issues/"
-        ),
-    ]
+html_theme = "furo"
+html_static_path = ["_static"]
+html_css_files = ["theme.css"]
+html_copy_source = False
+html_theme_options = {
+    "source_repository": "https://github.com/davidism/flask-alembic/",
+    "source_branch": "main",
+    "source_directory": "docs/",
+    "light_css_variables": {
+        "font-stack": "'Atkinson Hyperlegible', sans-serif",
+        "font-stack--monospace": "'Source Code Pro', monospace",
+    },
 }
-html_sidebars = {
-    "index": ["project.html", "localtoc.html", "searchbox.html"],
-    "**": ["localtoc.html", "relations.html", "searchbox.html"],
-}
-singlehtml_sidebars = {"index": ["project.html", "localtoc.html"]}
-html_title = f"{project} Documentation ({version})"
-html_show_sourcelink = False
+pygments_style = "default"
+pygments_style_dark = "github-dark"
+html_show_copyright = False
+html_use_index = False
+html_domain_indices = False

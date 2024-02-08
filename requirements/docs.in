@@ -1,4 +1,4 @@
-pallets-sphinx-themes
 sphinx
-sphinx-issues
+furo
+myst-parser
 sphinxcontrib-log-cabinet

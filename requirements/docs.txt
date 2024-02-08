@@ -8,40 +8,61 @@ alabaster==0.7.16
     # via sphinx
 babel==2.14.0
     # via sphinx
+beautifulsoup4==4.12.3
+    # via furo
 certifi==2024.2.2
     # via requests
 charset-normalizer==3.3.2
     # via requests
 docutils==0.20.1
-    # via sphinx
+    # via
+    #   myst-parser
+    #   sphinx
+furo==2024.1.29
+    # via -r docs.in
 idna==3.6
     # via requests
 imagesize==1.4.1
     # via sphinx
 jinja2==3.1.3
-    # via sphinx
+    # via
+    #   myst-parser
+    #   sphinx
+markdown-it-py==3.0.0
+    # via
+    #   mdit-py-plugins
+    #   myst-parser
 markupsafe==2.1.5
     # via jinja2
-packaging==23.2
-    # via
-    #   pallets-sphinx-themes
-    #   sphinx
-pallets-sphinx-themes==2.1.1
+mdit-py-plugins==0.4.0
+    # via myst-parser
+mdurl==0.1.2
+    # via markdown-it-py
+myst-parser==2.0.0
     # via -r docs.in
-pygments==2.17.2
+packaging==23.2
     # via sphinx
+pygments==2.17.2
+    # via
+    #   furo
+    #   sphinx
+pyyaml==6.0.1
+    # via myst-parser
 requests==2.31.0
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
+soupsieve==2.5
+    # via beautifulsoup4
 sphinx==7.2.6
     # via
     #   -r docs.in
-    #   pallets-sphinx-themes
-    #   sphinx-issues
+    #   furo
+    #   myst-parser
+    #   sphinx-basic-ng
     #   sphinxcontrib-log-cabinet
-sphinx-issues==4.0.0
-    # via -r docs.in
+sphinx-basic-ng==1.0.0b2
+    # via furo
 sphinxcontrib-applehelp==1.0.8
     # via sphinx
 sphinxcontrib-devhelp==1.0.6

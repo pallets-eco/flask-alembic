@@ -130,11 +130,6 @@ class Alembic:
         By default, this uses the current UTC timestamp. Override this
         method, or assign a static method, to change this.
 
-        For example, to use the current timestamp::
-
-            alembic = Alembic(app)
-            alembic.rev_id = lambda: str(datetime.utcnow().timestamp())
-
         .. versionchanged:: 3.0
             Uses the current UTC timestamp instead of a UUID.
         """
@@ -542,7 +537,7 @@ class Alembic:
         )
 
     def produce_migrations(self) -> MigrationScript:
-        """Generate the :class:`~alembic.autogenerate.MigrationScript`
+        """Generate the :class:`~alembic.operations.ops.MigrationScript`
         object that would generate a new revision.
         """
         db = current_app.extensions["sqlalchemy"]
