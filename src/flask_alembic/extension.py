@@ -6,6 +6,8 @@ import os
 import shutil
 import sys
 import typing as t
+from datetime import datetime
+from datetime import timezone
 from weakref import WeakKeyDictionary
 
 from alembic import autogenerate
@@ -125,15 +127,18 @@ class Alembic:
     def rev_id(self) -> str:
         """Generate a unique id for a revision.
 
-        By default this uses :func:`alembic.util.rev_id`. Override this
+        By default, this uses the current UTC timestamp. Override this
         method, or assign a static method, to change this.
 
         For example, to use the current timestamp::
 
             alembic = Alembic(app)
             alembic.rev_id = lambda: str(datetime.utcnow().timestamp())
+
+        .. versionchanged:: 3.0
+            Uses the current UTC timestamp instead of a UUID.
         """
-        return util.rev_id()
+        return str(int(datetime.now(timezone.utc).timestamp()))
 
     @property
     def config(self) -> Config:

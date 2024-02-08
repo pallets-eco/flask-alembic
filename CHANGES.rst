@@ -15,6 +15,7 @@ Unreleased
 -   Various arguments no longer use a default value when passed ``None``.
 -   ``compare_server_default`` defaults to ``True``. Alembic already defaults
     ``compare_type`` to ``True``.
+-   ``rev_id`` defaults to the current UTC timestamp instead of a UUID.
 
 
 Version 2.0.1
