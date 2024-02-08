@@ -11,6 +11,7 @@ Unreleased
 -   Drop support for Flask-Script.
 -   Add type annotations.
 -   Adding the CLI is skipped if ``command_name`` is empty rather than ``False``.
+-   The internal cache only holds a weak reference to the Flask app.
 
 
 Version 2.0.1

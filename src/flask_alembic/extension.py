@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import shutil
 import sys
 import typing as t
+from weakref import WeakKeyDictionary
 
 from alembic import autogenerate
 from alembic import util
@@ -42,7 +44,7 @@ class Alembic:
         run_mkdir: bool = True,
         command_name: str = "db",
     ):
-        self._cache: dict[Flask, dict[str, t.Any]] = {}
+        self._cache: WeakKeyDictionary[Flask, _Cache] = WeakKeyDictionary()
         self.run_mkdir: bool = run_mkdir
         self.command_name: str = command_name
 
@@ -70,7 +72,7 @@ class Alembic:
             alembic_logger.addHandler(console_handler)
 
         if app is not None:
-            self.init_app(app, run_mkdir)
+            self.init_app(app)
 
     def init_app(
         self,
@@ -96,9 +98,9 @@ class Alembic:
         config.setdefault("version_locations", [])
         app.config.setdefault("ALEMBIC_CONTEXT", {})
 
-        self._cache[app] = {}
+        self._cache[app] = cache = _Cache()
 
-        app.teardown_appcontext(self._clear_cache)
+        app.teardown_appcontext(cache.clear)
 
         if run_mkdir or (run_mkdir is None and self.run_mkdir):
             with app.app_context():
@@ -112,21 +114,7 @@ class Alembic:
                 command_name or self.command_name,
             )
 
-    def _clear_cache(self, exc: BaseException | None = None) -> None:
-        """Clear the cached Alembic objects for the given app.
-
-        This is called automatically during app context teardown.
-
-        :param exc: Exception from teardown handler.
-        """
-        cache = self._get_cache()
-
-        if "context" in cache:
-            cache["context"].connection.close()
-
-        cache.clear()
-
-    def _get_cache(self) -> dict[str, t.Any]:
+    def _get_cache(self) -> _Cache:
         """Get the cache of Alembic objects for the current app."""
         return self._cache[current_app._get_current_object()]  # type: ignore[attr-defined]
 
@@ -150,8 +138,8 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if "config" not in cache:
-            cache["config"] = c = Config()
+        if cache.config is None:
+            cache.config = c = Config()
 
             script_location = current_app.config["ALEMBIC"]["script_location"]
 
@@ -179,7 +167,7 @@ class Alembic:
 
                 c.set_main_option(key, value)
 
-        return cache["config"]  # type: ignore[no-any-return]
+        return cache.config
 
     @property
     def script_directory(self) -> ScriptDirectory:
@@ -188,10 +176,10 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if "script" not in cache:
-            cache["script"] = ScriptDirectory.from_config(self.config)
+        if cache.script is None:
+            cache.script = ScriptDirectory.from_config(self.config)
 
-        return cache["script"]  # type: ignore[no-any-return]
+        return cache.script
 
     @property
     def environment_context(self) -> EnvironmentContext:
@@ -201,10 +189,10 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if "env" not in cache:
-            cache["env"] = EnvironmentContext(self.config, self.script_directory)
+        if cache.env is None:
+            cache.env = EnvironmentContext(self.config, self.script_directory)
 
-        return cache["env"]  # type: ignore[no-any-return]
+        return cache.env
 
     @property
     def migration_context(self) -> MigrationContext:
@@ -218,7 +206,7 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if "context" not in cache:
+        if cache.context is None:
             db = current_app.extensions["sqlalchemy"].db
             env = self.environment_context
             conn = db.engine.connect()
@@ -227,9 +215,9 @@ class Alembic:
                 target_metadata=db.metadata,
                 **current_app.config["ALEMBIC_CONTEXT"],
             )
-            cache["context"] = env.get_context()
+            cache.context = env.get_context()
 
-        return cache["context"]  # type: ignore[no-any-return]
+        return cache.context
 
     @property
     def op(self) -> Operations:
@@ -242,10 +230,10 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if "op" not in cache:
-            cache["op"] = Operations(self.migration_context)
+        if cache.op is None:
+            cache.op = Operations(self.migration_context)
 
-        return cache["op"]  # type: ignore[no-any-return]
+        return cache.op
 
     def run_migrations(
         self,
@@ -558,3 +546,30 @@ class Alembic:
         """
         db = current_app.extensions["sqlalchemy"].db
         return autogenerate.compare_metadata(self.migration_context, db.metadata)  # type: ignore[no-any-return]
+
+
+@dataclasses.dataclass
+class _Cache:
+    """Cached Alembic objects for a given Flask app."""
+
+    config: Config | None = None
+    script: ScriptDirectory | None = None
+    env: EnvironmentContext | None = None
+    context: MigrationContext | None = None
+    op: Operations | None = None
+
+    def clear(self, exc: BaseException | None = None) -> None:
+        """Clear the cached Alembic objects.
+
+        This is called automatically during app context teardown.
+
+        :param exc: Exception from teardown handler.
+        """
+        if self.context is not None and self.context.connection is not None:
+            self.context.connection.close()
+
+        self.config = None
+        self.script = None
+        self.env = None
+        self.context = None
+        self.op = None
