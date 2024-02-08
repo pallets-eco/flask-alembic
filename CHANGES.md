@@ -1,6 +1,6 @@
 ## Version 3.0.0
 
-Unreleased
+Released 2024-02-08
 
 - Minimum supported version of Python is 3.8. Drop support for Python 2.
 - Minimum supported version of Flask is 3.0.
