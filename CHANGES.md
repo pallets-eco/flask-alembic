@@ -5,7 +5,7 @@ Unreleased
 - Minimum supported version of Python is 3.8. Drop support for Python 2.
 - Minimum supported version of Flask is 3.0.
 - Minimum supported version of SQLAlchemy is 2.0.
-- Minimum supported version of Flask-SQLAlchemy is 3.0.
+- Minimum supported version of Flask-SQLAlchemy is 3.1.
 - Minimum supported version of Alembic is 1.13.
 - Drop support for Flask-Script.
 - Add type annotations.
