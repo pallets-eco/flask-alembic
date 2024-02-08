@@ -105,9 +105,16 @@ def upgrade(alembic: Alembic, target: str = "heads") -> None:
 
 @cli.command()
 @click.pass_obj
-@click.argument("target", default="1")
+@click.argument("target", default="-1")
 def downgrade(alembic: Alembic, target: str = "-1") -> None:
     """Run migration to downgrade the database."""
+    try:
+        # If an integer was given, ensure it's negative, since it's hard to
+        # give negative numbers as CLI args.
+        target = str(-abs(int(target)))
+    except ValueError:
+        pass
+
     alembic.downgrade(target)
 
 
@@ -143,16 +150,7 @@ def revision(
     path: str | None = None,
 ) -> None:
     """Generate a new revision."""
-    alembic.revision(
-        message,
-        empty,
-        branch,
-        parent,
-        splice,
-        depend,  # type: ignore[arg-type]
-        label,
-        path,
-    )
+    alembic.revision(message, empty, branch, parent, splice, depend, label, path)
 
 
 @cli.command()
@@ -167,11 +165,7 @@ def merge(
     label: list[str] | None = None,
 ) -> None:
     """Generate a merge revision."""
-    alembic.merge(
-        revisions,  # type: ignore[arg-type]
-        message,
-        label,
-    )
+    alembic.merge(revisions, message, label)
 
 
 def _cmd_format(r: Script, verbose: bool) -> str:

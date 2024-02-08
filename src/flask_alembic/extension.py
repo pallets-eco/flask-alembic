@@ -22,6 +22,13 @@ from alembic.script.revision import ResolutionError
 from flask import current_app
 from flask import Flask
 
+if t.TYPE_CHECKING:
+    import typing_extensions as te
+
+t_rev: te.TypeAlias = (
+    "str | Script | list[str] | list[Script] | tuple[str, ...] | tuple[Script, ...]"
+)
+
 
 class Alembic:
     """Provide an Alembic environment and migration API.
@@ -316,41 +323,55 @@ class Alembic:
             if revision.is_branch_point
         ]
 
-    def log(
-        self, start: str | Script = "base", end: str | Script = "heads"
-    ) -> list[Script]:
+    def _simplify_rev(
+        self,
+        rev: t_rev | int,
+        handle_current: bool = False,
+        handle_int: bool = False,
+    ) -> list[str]:
+        if isinstance(rev, str):
+            if rev == "current" and handle_current:
+                return [r.revision for r in self.current()]
+            elif handle_int:
+                try:
+                    return [str(int(rev))]
+                except ValueError:
+                    return [rev]
+            else:
+                return [rev]
+
+        if isinstance(rev, Script):
+            return [rev.revision]
+
+        if isinstance(rev, int):
+            return [str(rev)]
+
+        return [r.revision if isinstance(r, Script) else r for r in rev]
+
+    def log(self, start: t_rev = "base", end: t_rev = "heads") -> list[Script]:
         """Get the list of revisions in the order they will run.
 
         :param start: Only get entries since this revision.
         :param end: Only get entries until this revision.
         """
-        if start is None:
-            start = "base"
-        elif start == "current":
-            start = [r.revision for r in self.current()]
-        else:
-            start = getattr(start, "revision", start)
+        return list(
+            self.script_directory.walk_revisions(
+                self._simplify_rev(start, handle_current=True),  # type: ignore[arg-type]
+                self._simplify_rev(end, handle_current=True),  # type: ignore[arg-type]
+            )
+        )
 
-        if end is None:
-            end = "heads"
-        elif end == "current":
-            end = [r.revision for r in self.current()]
-        else:
-            end = getattr(end, "revision", end)
-
-        return list(self.script_directory.walk_revisions(start, end))
-
-    def stamp(self, target: str | Script | list[str | Script] = "heads") -> None:
+    def stamp(self, target: t_rev = "heads") -> None:
         """Set the current database revision without running migrations.
 
         :param target: Revision to set to.
         """
-        target = "heads" if target is None else getattr(target, "revision", target)
+        target_arg = self._simplify_rev(target)
 
         def do_stamp(
             revision: str | list[str] | tuple[str, ...], context: MigrationContext
         ) -> list[MigrationStep]:
-            return self.script_directory._stamp_revs(target, revision)  # type: ignore[return-value]
+            return self.script_directory._stamp_revs(target_arg, revision)  # type: ignore[return-value]
 
         self.run_migrations(do_stamp)
 
@@ -359,13 +380,15 @@ class Alembic:
 
         :param target: Revision to go up to.
         """
-        target = "heads" if target is None else getattr(target, "revision", target)
-        target = str(target)
+        target_arg = self._simplify_rev(target, handle_int=True)
 
         def do_upgrade(
             revision: str | list[str] | tuple[str, ...], context: MigrationContext
         ) -> list[MigrationStep]:
-            return self.script_directory._upgrade_revs(target, revision)  # type: ignore[return-value]
+            return self.script_directory._upgrade_revs(  # type: ignore[return-value]
+                target_arg,  # type: ignore[arg-type]
+                revision,  # type: ignore[arg-type]
+            )
 
         self.run_migrations(do_upgrade)
 
@@ -374,20 +397,15 @@ class Alembic:
 
         :param target: Revision to go down to.
         """
-        try:
-            target = int(target)
-        except ValueError:
-            target = getattr(target, "revision", target)
-        else:
-            if target > 0:
-                target = -target
-
-        target = str(target)
+        target_arg = self._simplify_rev(target, handle_int=True)
 
         def do_downgrade(
             revision: str | list[str] | tuple[str, ...], context: MigrationContext
         ) -> list[MigrationStep]:
-            return self.script_directory._downgrade_revs(target, revision)  # type: ignore[return-value]
+            return self.script_directory._downgrade_revs(  # type: ignore[return-value]
+                target_arg,  # type: ignore[arg-type]
+                revision,  # type: ignore[arg-type]
+            )
 
         self.run_migrations(do_downgrade)
 
@@ -396,9 +414,9 @@ class Alembic:
         message: str,
         empty: bool = False,
         branch: str = "default",
-        parent: str | Script | list[str | Script] = "head",
+        parent: t_rev = "head",
         splice: bool = False,
-        depend: str | Script | list[str | Script] | None = None,
+        depend: t_rev | None = None,
         label: str | list[str] | None = None,
         path: str | None = None,
     ) -> list[Script | None]:
@@ -415,12 +433,8 @@ class Alembic:
         :param path: Where to store this revision.
         :return: List of new revisions.
         """
-        if parent is None:
-            parent = ["head"]
-        elif isinstance(parent, str):
-            parent = [parent]
-        else:
-            parent = [getattr(r, "revision", r) for r in parent]
+        parent_arg = self._simplify_rev(parent)
+        depend_arg = self._simplify_rev(depend) if depend is not None else None
 
         if label is None:
             label = []
@@ -431,9 +445,9 @@ class Alembic:
 
         # manage independent branches
         if branch:
-            for i, item in enumerate(parent):
+            for i, item in enumerate(parent_arg):
                 if item in ("base", "head"):
-                    parent[i] = f"{branch}@{item}"
+                    parent_arg[i] = f"{branch}@{item}"
 
             if not path:
                 branch_path = dict(
@@ -457,7 +471,7 @@ class Alembic:
             if not branch_exists:
                 # label the first revision of a separate branch and start it from base
                 label.insert(0, branch)
-                parent = ["base"]
+                parent_arg = ["base"]
 
         if not path:
             path = self.script_directory.dir
@@ -472,12 +486,12 @@ class Alembic:
             {
                 "message": message,
                 "sql": False,
-                "head": parent,
+                "head": parent_arg,
                 "splice": splice,
                 "branch_label": label,
                 "version_path": path,
                 "rev_id": self.rev_id(),
-                "depends_on": depend,
+                "depends_on": depend_arg,
             },
         )
 
@@ -500,7 +514,7 @@ class Alembic:
 
     def merge(
         self,
-        revisions: str | Script | list[str | Script] = "heads",
+        revisions: t_rev = "heads",
         message: str | None = None,
         label: str | list[str] | None = None,
     ) -> Script | None:
@@ -512,23 +526,15 @@ class Alembic:
         :param label: Label(s) to apply to this revision.
         :return: A new revision object.
         """
-        if not revisions:
-            revisions = ["heads"]
-        elif isinstance(revisions, str):
-            revisions = [revisions]
-        else:
-            revisions = [getattr(r, "revision", r) for r in revisions]
+        revisions_arg = self._simplify_rev(revisions)
 
         if message is None:
-            message = f"merge {', '.join(revisions)}"
-
-        if isinstance(label, str):
-            label = [label]
+            message = f"merge {', '.join(revisions_arg)}"
 
         return self.script_directory.generate_revision(
             revid=self.rev_id(),
             message=message,
-            head=revisions,
+            head=revisions_arg,
             branch_labels=label,
             config=self.config,
         )
