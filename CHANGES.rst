@@ -13,6 +13,8 @@ Unreleased
 -   Adding the CLI is skipped if ``command_name`` is empty rather than ``False``.
 -   The internal cache only holds a weak reference to the Flask app.
 -   Various arguments no longer use a default value when passed ``None``.
+-   ``compare_server_default`` defaults to ``True``. Alembic already defaults
+    ``compare_type`` to ``True``.
 
 
 Version 2.0.1

@@ -103,10 +103,10 @@ class Alembic:
         config = app.config.setdefault("ALEMBIC", {})
         config.setdefault("script_location", "migrations")
         config.setdefault("version_locations", [])
-        app.config.setdefault("ALEMBIC_CONTEXT", {})
+        ctx = app.config.setdefault("ALEMBIC_CONTEXT", {})
+        ctx.setdefault("compare_server_default", True)
 
         self._cache[app] = cache = _Cache()
-
         app.teardown_appcontext(cache.clear)
 
         if run_mkdir or (run_mkdir is None and self.run_mkdir):
@@ -116,10 +116,7 @@ class Alembic:
         if command_name or (command_name is None and self.command_name):
             from .cli import cli
 
-            app.cli.add_command(
-                cli,
-                command_name or self.command_name,
-            )
+            app.cli.add_command(cli, command_name or self.command_name)
 
     def _get_cache(self) -> _Cache:
         """Get the cache of Alembic objects for the current app."""

@@ -21,5 +21,9 @@ Configuration for Alembic and its migrations uses the following Flask config key
 an absolute path, it will be relative to the application root. It defaults to
 ``migrations`` relative to the application root.
 
+``ALEMBIC_CONTEXt["compare_type"]`` defaults to ``True`` in Alembic.
+``ALEMBIC_CONTEXT["compare_server_default"]`` defaults to ``True``, it would otherwise
+default to ``False`` in Alembic.
+
 .. _alembic-config: https://alembic.sqlalchemy.org/en/latest/tutorial.html#editing-the-ini-file
 .. _alembic-runtime: https://alembic.sqlalchemy.org/en/latest/api/runtime.html#runtime-objects
