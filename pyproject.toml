@@ -2,7 +2,7 @@
 name = "Flask-Alembic"
 version = "3.0.0.dev"
 description = "Flask extension to integrate Alembic with Flask-SQLAlchemy."
-readme = "README.rst"
+readme = "README.md"
 license = { file = "LICENSE.txt" }
 authors = [{name = "David Lord", email = "davidism@gmail.com"},]
 classifiers = [
