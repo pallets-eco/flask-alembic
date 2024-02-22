@@ -1,3 +1,7 @@
+## Version 3.0.1
+
+Unlreleased
+
 ## Version 3.0.0
 
 Released 2024-02-08
