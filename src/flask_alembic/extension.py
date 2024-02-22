@@ -331,7 +331,7 @@ class Alembic:
                 return [r.revision for r in self.current()]
             elif handle_int:
                 try:
-                    return [str(int(rev))]
+                    return [f"{int(rev):+d}"]
                 except ValueError:
                     return [rev]
             else:
@@ -341,7 +341,8 @@ class Alembic:
             return [rev.revision]
 
         if isinstance(rev, int):
-            return [str(rev)]
+            # Positive relative ids must have + prefix.
+            return [f"{rev:+d}"]
 
         return [r.revision if isinstance(r, Script) else r for r in rev]
 
@@ -377,7 +378,12 @@ class Alembic:
 
         :param target: Revision to go up to.
         """
-        target_arg = self._simplify_rev(target, handle_int=True)
+        target_arg: list[str] | str = self._simplify_rev(target, handle_int=True)
+
+        if len(target_arg) == 1:
+            # Despite its signature, _upgrade_revs can take a list of ids. But
+            # if it's a relative id (+1), it must be a single value.
+            target_arg = target_arg[0]
 
         def do_upgrade(
             revision: str | list[str] | tuple[str, ...], context: MigrationContext
@@ -394,13 +400,14 @@ class Alembic:
 
         :param target: Revision to go down to.
         """
-        target_arg = self._simplify_rev(target, handle_int=True)
+        # Unlike upgrade, downgrade always requires a single id.
+        target_arg = self._simplify_rev(target, handle_int=True)[0]
 
         def do_downgrade(
             revision: str | list[str] | tuple[str, ...], context: MigrationContext
         ) -> list[MigrationStep]:
             return self.script_directory._downgrade_revs(  # type: ignore[return-value]
-                target_arg,  # type: ignore[arg-type]
+                target_arg,
                 revision,  # type: ignore[arg-type]
             )
 

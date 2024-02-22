@@ -2,6 +2,8 @@
 
 Unlreleased
 
+- Fix handling of relative ids (`+1`, `-1`) passed to `downgrade` and `upgrade`.
+
 ## Version 3.0.0
 
 Released 2024-02-08
