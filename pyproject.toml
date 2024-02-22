@@ -1,6 +1,6 @@
 [project]
 name = "Flask-Alembic"
-version = "3.0.1.dev"
+version = "3.0.1"
 description = "Flask extension to integrate Alembic with Flask-SQLAlchemy."
 readme = "README.md"
 license = { file = "LICENSE.txt" }
