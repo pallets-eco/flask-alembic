@@ -1,6 +1,6 @@
 ## Version 3.0.1
 
-Unlreleased
+Released 2024-02-22
 
 - Fix handling of relative ids (`+1`, `-1`) passed to `downgrade` and `upgrade`.
 
