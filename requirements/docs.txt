@@ -18,7 +18,7 @@ docutils==0.20.1
     # via
     #   myst-parser
     #   sphinx
-furo==2024.1.29
+furo==2024.4.27
     # via -r docs.in
 idna==3.6
     # via requests
@@ -38,7 +38,7 @@ mdit-py-plugins==0.4.0
     # via myst-parser
 mdurl==0.1.2
     # via markdown-it-py
-myst-parser==2.0.0
+myst-parser==3.0.1
     # via -r docs.in
 packaging==23.2
     # via sphinx
@@ -54,7 +54,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.5
     # via beautifulsoup4
-sphinx==7.2.6
+sphinx==7.3.7
     # via
     #   -r docs.in
     #   furo

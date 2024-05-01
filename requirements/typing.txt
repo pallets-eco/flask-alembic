@@ -6,7 +6,7 @@
 #
 iniconfig==2.0.0
     # via pytest
-mypy==1.8.0
+mypy==1.10.0
     # via -r typing.in
 mypy-extensions==1.0.0
     # via mypy
@@ -14,11 +14,11 @@ nodeenv==1.8.0
     # via pyright
 packaging==23.2
     # via pytest
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
-pyright==1.1.350
+pyright==1.1.360
     # via -r typing.in
-pytest==8.0.0
+pytest==8.2.0
     # via -r typing.in
 typing-extensions==4.9.0
     # via mypy
