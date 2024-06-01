@@ -43,7 +43,7 @@ filelock==3.13.1
     # via
     #   tox
     #   virtualenv
-furo==2024.4.27
+furo==2024.5.6
     # via -r docs.txt
 identify==2.5.33
     # via pre-commit
@@ -114,7 +114,7 @@ pluggy==1.5.0
     #   -r typing.txt
     #   pytest
     #   tox
-pre-commit==3.7.0
+pre-commit==3.7.1
     # via -r dev.in
 pygments==2.17.2
     # via
@@ -123,9 +123,9 @@ pygments==2.17.2
     #   sphinx
 pyproject-api==1.6.1
     # via tox
-pyright==1.1.360
+pyright==1.1.365
     # via -r typing.txt
-pytest==8.2.0
+pytest==8.2.1
     # via
     #   -r tests.txt
     #   -r typing.txt
