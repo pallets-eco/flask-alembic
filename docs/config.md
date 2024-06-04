@@ -22,7 +22,7 @@ A dictionary containing options passed to {class}`.MigrationContext` by
 it is not an absolute path, it will be relative to the application root. It
 defaults to `migrations` relative to the application root.
 
-`ALEMBIC_CONTEXt["compare_type"]` defaults to `True` in Alembic.
+`ALEMBIC_CONTEXT["compare_type"]` defaults to `True` in Alembic.
 `ALEMBIC_CONTEXT["compare_server_default"]` defaults to `True`, it would
 otherwise default to `False` in Alembic.
 
