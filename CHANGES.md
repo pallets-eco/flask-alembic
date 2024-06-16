@@ -5,6 +5,9 @@ Unreleased
 - Support Flask-SQLAlchemy-Lite and plain SQLAlchemy, in addition to
   Flask-SQLAlchemy. {pr}`26`
 - Support multiple databases, and multiple metadata per database. {pr}`26`
+- The constructor args `run_mkdir` and `command_name` are keyword only. {pr}`27`
+- Deprecate the `init_app` args `run_mkdir` and `command_name`. They can be
+  passed to the constructor instead. {pr}`27`
 
 ## Version 3.0.1
 

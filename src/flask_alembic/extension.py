@@ -63,14 +63,17 @@ class Alembic:
         Flask-SQLAlchemy-Lite and plain SQLAlchemy in addition to
         Flask-SQLAlchemy. Support multiple databases and multiple metadata per
         database.
+
+    .. versionchanged:: 3.1
+        ``run_mkdir`` and ``command_name`` are keyword-only arguments.
     """
 
     def __init__(
         self,
         app: Flask | None = None,
+        *,
         run_mkdir: bool = True,
         command_name: str = "db",
-        *,
         metadatas: sa.MetaData
         | list[sa.MetaData]
         | dict[str, sa.MetaData | list[sa.MetaData]]
@@ -126,8 +129,9 @@ class Alembic:
     def init_app(
         self,
         app: Flask,
-        run_mkdir: bool | None = None,
-        command_name: str | None = None,
+        *,
+        run_mkdir: None = None,
+        command_name: None = None,
     ) -> None:
         """Register this extension on an app. Will automatically set up
         migration directory by default.
@@ -136,9 +140,10 @@ class Alembic:
         :meth:`__init__` if not ``None``.
 
         :param app: App to register.
-        :param run_mkdir: Run :meth:`mkdir` automatically.
-        :param command_name: Register a Click command with this name, unless it
-            is the empty string.
+
+        .. versionchanged:: 3.1
+            ``run_mkdir`` and ``command_name`` are deprecated and will be
+            removed in Flask-Alembic 3.2. Use them in the constructor instead.
         """
         app.extensions["alembic"] = self
 
@@ -151,9 +156,29 @@ class Alembic:
         self._cache[app] = cache = _Cache()
         app.teardown_appcontext(cache.clear)
 
+        if run_mkdir is not None:
+            import warnings
+
+            warnings.warn(
+                "The 'run_mkdir' argument is deprecated and will be removed in"
+                " Flask-Alembic 3.2. Pass it to the constructor instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+
         if run_mkdir or (run_mkdir is None and self.run_mkdir):
             with app.app_context():
                 self.mkdir()
+
+        if command_name is not None:
+            import warnings
+
+            warnings.warn(
+                "The 'command_name' argument is deprecated and will be removed"
+                " in Flask-Alembic 3.2. Pass it to the constructor instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if command_name or (command_name is None and self.command_name):
             from .cli import cli
