@@ -1,6 +1,6 @@
 ## Version 3.1.0
 
-Unreleased
+Released 2024-06-16
 
 - Drop support for Python 3.8. {pr}`28`
 - Support Flask-SQLAlchemy-Lite and plain SQLAlchemy, in addition to
