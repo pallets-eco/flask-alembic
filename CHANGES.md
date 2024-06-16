@@ -2,7 +2,7 @@
 
 Unreleased
 
-- Drop support for Python 3.8.
+- Drop support for Python 3.8. {pr}`28`
 - Support Flask-SQLAlchemy-Lite and plain SQLAlchemy, in addition to
   Flask-SQLAlchemy. {pr}`26`
 - Support multiple databases, and multiple metadata per database. {pr}`26`
@@ -10,7 +10,7 @@ Unreleased
 - Deprecate the `init_app` args `run_mkdir` and `command_name`. They can be
   passed to the constructor instead. {pr}`27`
 - Dict values in the `ALEMBIC` config are treated as Alembic config sections,
-  allowing use of Alembic features like `post_write_hooks`. {pr}`28`
+  allowing use of Alembic features like `post_write_hooks`. {pr}`29`
 
 ## Version 3.0.1
 
