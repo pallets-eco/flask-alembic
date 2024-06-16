@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 from flask import Flask
 from flask.ctx import AppContext
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy_lite import SQLAlchemy
 
 from flask_alembic import Alembic
 
@@ -15,7 +15,7 @@ from flask_alembic import Alembic
 @pytest.fixture
 def app(request: pytest.FixtureRequest, tmp_path: Path) -> Flask:
     app = Flask(request.module.__name__, root_path=os.fspath(tmp_path))
-    app.config["SQLALCHEMY_BINDS"] = {
+    app.config["SQLALCHEMY_ENGINES"] = {
         "default": "sqlite://",
         "other": "sqlite://",
     }
