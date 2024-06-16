@@ -208,38 +208,41 @@ class Alembic:
         """
         cache = self._get_cache()
 
-        if cache.config is None:
-            cache.config = c = Config()
+        if cache.config is not None:
+            return cache.config
 
-            script_location = current_app.config["ALEMBIC"]["script_location"]
+        cache.config = c = Config()
+        script_location = current_app.config["ALEMBIC"]["script_location"]
 
-            if not os.path.isabs(script_location) and ":" not in script_location:
-                script_location = os.path.join(current_app.root_path, script_location)
+        if not os.path.isabs(script_location) and ":" not in script_location:
+            script_location = os.path.join(current_app.root_path, script_location)
 
-            version_locations = [script_location]
+        version_locations = [script_location]
 
-            for item in current_app.config["ALEMBIC"]["version_locations"]:
-                version_location = item if isinstance(item, str) else item[1]
+        for item in current_app.config["ALEMBIC"]["version_locations"]:
+            version_location = item if isinstance(item, str) else item[1]
 
-                if not os.path.isabs(version_location) and ":" not in version_location:
-                    version_location = os.path.join(
-                        current_app.root_path, version_location
-                    )
+            if not os.path.isabs(version_location) and ":" not in version_location:
+                version_location = os.path.join(current_app.root_path, version_location)
 
-                version_locations.append(version_location)
+            version_locations.append(version_location)
 
-            c.set_main_option("script_location", script_location)
-            c.set_main_option("version_locations", ",".join(version_locations))
+        c.set_main_option("script_location", script_location)
+        c.set_main_option("version_locations", ",".join(version_locations))
 
-            for key, value in current_app.config["ALEMBIC"].items():
-                if key in ("script_location", "version_locations"):
-                    continue
+        for key, value in current_app.config["ALEMBIC"].items():
+            if key in ("script_location", "version_locations"):
+                continue
 
+            if isinstance(value, dict):
+                for inner_key, inner_value in value.items():
+                    c.set_section_option(key, inner_key, inner_value)
+            else:
                 c.set_main_option(key, value)
 
-            if len(self.metadatas) > 1:
-                # Add the names used by the multidb template.
-                c.set_main_option("databases", ", ".join(self.metadatas))
+        if len(self.metadatas) > 1:
+            # Add the names used by the multidb template.
+            c.set_main_option("databases", ", ".join(self.metadatas))
 
         return cache.config
 
