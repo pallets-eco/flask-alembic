@@ -11,6 +11,16 @@ multiple database templates.
 [Flask-SQLAlchemy]: https://flask-sqlalchemy.palletsprojects.com
 [Flask-SQLAlchemy-Lite]: https://flask-sqlalchemy-lite.readthedocs.io
 
+## Pallets Community Ecosystem
+
+> [!IMPORTANT]\
+> This project is part of the Pallets Community Ecosystem. Pallets is the open
+> source organization that maintains Flask; Pallets-Eco enables community
+> maintenance of Flask extensions. If you are interested in helping maintain
+> this project, please reach out on [the Pallets Discord server][discord].
+>
+> [discord]: https://discord.gg/pallets
+
 ## Basic Usage
 
 You've created a Flask application and some models with Flask-SQLAlchemy. Now
