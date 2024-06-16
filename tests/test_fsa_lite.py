@@ -5,15 +5,11 @@ from pathlib import Path
 
 import pytest
 from flask import Flask
+from flask_sqlalchemy_lite import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_alembic import Alembic
-
-try:
-    from flask_sqlalchemy_lite import SQLAlchemy
-except ImportError:
-    pytest.skip("flask_sqlalchemy_lite not available", allow_module_level=True)
 
 
 @pytest.fixture

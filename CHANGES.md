@@ -2,6 +2,7 @@
 
 Unreleased
 
+- Drop support for Python 3.8.
 - Support Flask-SQLAlchemy-Lite and plain SQLAlchemy, in addition to
   Flask-SQLAlchemy. {pr}`26`
 - Support multiple databases, and multiple metadata per database. {pr}`26`

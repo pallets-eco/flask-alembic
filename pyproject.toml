@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Database",
     "Typing :: Typed",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "alembic>=1.13",
     "flask>=3.0",
@@ -47,14 +47,14 @@ source = ["flask_alembic", "tests"]
 source = ["src", "*/site-packages"]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 files = ["src/flask_alembic", "tests"]
 show_error_codes = true
 pretty = true
 strict = true
 
 [tool.pyright]
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 include = ["src/flask_alembic", "tests"]
 
 [tool.ruff]
