@@ -2,6 +2,10 @@
 
 Unreleased
 
+- Support Flask-SQLAlchemy-Lite and plain SQLAlchemy, in addition to
+  Flask-SQLAlchemy. {pr}`26`
+- Support multiple databases, and multiple metadata per database. {pr}`26`
+
 ## Version 3.0.1
 
 Released 2024-02-22

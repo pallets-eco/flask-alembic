@@ -6,10 +6,12 @@ import os
 import shutil
 import sys
 import typing as t
+from contextlib import ExitStack
 from datetime import datetime
 from datetime import timezone
 from weakref import WeakKeyDictionary
 
+import sqlalchemy as sa
 from alembic import autogenerate
 from alembic import util
 from alembic.config import Config
@@ -45,6 +47,22 @@ class Alembic:
     :param run_mkdir: Run :meth:`mkdir` during ``init_app``.
     :param command_name: Register a Click command with this name during
         ``init_app``, unless it is the empty string.
+    :param metadatas: One or more :class:`~sqlalchemy.MetaData` to inspect when
+        generating migrations. A single metadata or list will be assigned to
+        the ``"default"`` key. Or a map can be given that specifies one or more
+        metadata for each key. When using Flask-SQLAlchemy, ``db.metadata`` is
+        used if this is not given.
+    :param engines: One or more engines to perform migrations on. Must match the
+        keys in ``metadatas``. A single engine will be assigned to the
+        ``"default"`` key. Or a map can be given that specifies the engine for
+        each key. When using Flask-SQLAlchemy(-Lite), ``db.engines`` is used
+        if this is not given.
+
+    .. versionchanged:: 3.1
+        Added the ``metadatas`` and ``enginess`` arguments. Support
+        Flask-SQLAlchemy-Lite and plain SQLAlchemy in addition to
+        Flask-SQLAlchemy. Support multiple databases and multiple metadata per
+        database.
     """
 
     def __init__(
@@ -52,10 +70,32 @@ class Alembic:
         app: Flask | None = None,
         run_mkdir: bool = True,
         command_name: str = "db",
+        *,
+        metadatas: sa.MetaData
+        | list[sa.MetaData]
+        | dict[str, sa.MetaData | list[sa.MetaData]]
+        | None = None,
+        engines: sa.Engine | dict[str, sa.Engine] | None = None,
     ):
         self._cache: WeakKeyDictionary[Flask, _Cache] = WeakKeyDictionary()
         self.run_mkdir: bool = run_mkdir
         self.command_name: str = command_name
+        self.metadatas: dict[str, sa.MetaData | list[sa.MetaData]]
+        self.engines: dict[str, sa.Engine]
+
+        if metadatas is None:
+            self.metadatas = {}
+        elif isinstance(metadatas, (sa.MetaData, list)):
+            self.metadatas = {"default": metadatas}
+        else:
+            self.metadatas = metadatas
+
+        if engines is None:
+            self.engines = {}
+        elif isinstance(engines, sa.Engine):
+            self.engines = {"default": engines}
+        else:
+            self.engines = engines
 
         # add logging handler if not configured
         console_handler = logging.StreamHandler(sys.stderr)
@@ -122,7 +162,8 @@ class Alembic:
 
     def _get_cache(self) -> _Cache:
         """Get the cache of Alembic objects for the current app."""
-        return self._cache[current_app._get_current_object()]  # type: ignore[attr-defined]
+        app = current_app._get_current_object()  # type: ignore[attr-defined]
+        return self._cache[app]
 
     def rev_id(self) -> str:
         """Generate a unique id for a revision.
@@ -171,6 +212,10 @@ class Alembic:
 
                 c.set_main_option(key, value)
 
+            if len(self.metadatas) > 1:
+                # Add the names used by the multidb template.
+                c.set_main_option("databases", ", ".join(self.metadatas))
+
         return cache.config
 
     @property
@@ -198,46 +243,132 @@ class Alembic:
 
         return cache.env
 
+    def _prepare_targets(
+        self,
+    ) -> tuple[dict[str, sa.Engine], dict[str, sa.MetaData | list[sa.MetaData]]]:
+        cache = self._get_cache()
+
+        if cache.engines is not None and cache.metadatas is not None:
+            return cache.engines, cache.metadatas
+
+        sa_ext = current_app.extensions.get("sqlalchemy")
+        metadatas = self.metadatas
+        engines = self.engines
+
+        if not metadatas and sa_ext is not None and hasattr(sa_ext, "metadata"):
+            metadatas = {"default": sa_ext.metadata}
+
+        if not metadatas:
+            raise RuntimeError(
+                "When not using Flask-SQLAlchemy, pass 'metadatas' when"
+                " creating the Alembic extension."
+            )
+
+        if not engines and sa_ext is not None:
+            engines = sa_ext.engines
+
+            if None in sa_ext.engines:
+                # Re-key Flask-SQLAlchemy default engine.
+                engines = engines.copy()
+                engines["default"] = sa_ext.engine
+
+        if not engines:
+            raise RuntimeError(
+                "Either use Flask-SQLAlchemy(-Lite) with engines configured, or"
+                " pass 'engines' when creating the Alembic extension."
+            )
+
+        missing = metadatas.keys() - engines.keys()
+
+        if missing:
+            plural = "config" if len(missing) == 1 else "configs"
+            missing_str = ", ".join(f"'{n}'" for n in missing)
+            raise RuntimeError(f"Missing engine {plural} for {missing_str}.")
+
+        cache.engines = engines
+        cache.metadatas = metadatas
+        return engines, metadatas
+
+    @property
+    def migration_contexts(self) -> dict[str, MigrationContext]:
+        """Get the map of Alembic
+        :class:`~alembic.runtime.migration.MigrationContext` for each configured
+        database key for the current app. Each context's connection will be
+        closed when the Flask application context ends.
+
+        .. versionadded:: 3.1
+        """
+        cache = self._get_cache()
+
+        if cache.contexts is not None:
+            return cache.contexts
+
+        engines, metadatas = self._prepare_targets()
+        env = self.environment_context
+        config = current_app.config["ALEMBIC_CONTEXT"]
+        cache.contexts = {}
+
+        if len(metadatas) == 1:
+            env.configure(
+                connection=engines["default"].connect(),
+                target_metadata=metadatas["default"],
+                **config,
+            )
+            cache.contexts["default"] = env.get_context()
+        else:
+            for name in metadatas:
+                # Set the upgrade and downgrade tokens for each context.
+                env.configure(
+                    connection=engines[name].connect(),
+                    target_metadata=metadatas[name],
+                    upgrade_token=f"{name}_upgrades",
+                    downgrade_token=f"{name}_downgrades",
+                    **config,
+                )
+                cache.contexts[name] = env.get_context()
+                # The migration context is passed a reference to the env's
+                # context_ops dict. Copy and replace it so that the next
+                # context is isolated from this one.
+                env.context_opts = env.context_opts.copy()
+
+        return cache.contexts
+
     @property
     def migration_context(self) -> MigrationContext:
         """Get the Alembic
-        :class:`~alembic.runtime.migration.MigrationContext` for the
-        current app.
+        :class:`~alembic.runtime.migration.MigrationContext` for the current
+        app. If multiple databases are configured, this is the context for the
+        ``"default"`` key. The context's connection will be closed when the
+        Flask application context ends.
+        """
+        return self.migration_contexts["default"]
 
-        Accessing this property opens a database connection but can't
-        close it automatically. Make sure to call
-        ``migration_context.connection.close()`` when you're done.
+    @property
+    def ops(self) -> dict[str, Operations]:
+        """Get the Alembic :class:`~alembic.operations.Operations` context for
+        each configured database key for the current app.
+
+        .. versionadded:: 3.1
         """
         cache = self._get_cache()
 
-        if cache.context is None:
-            db = current_app.extensions["sqlalchemy"]
-            env = self.environment_context
-            conn = db.engine.connect()
-            env.configure(
-                connection=conn,
-                target_metadata=db.metadata,
-                **current_app.config["ALEMBIC_CONTEXT"],
-            )
-            cache.context = env.get_context()
+        if cache.ops is not None:
+            return cache.ops
 
-        return cache.context
+        cache.ops = {}
+
+        for name, _context in self.migration_contexts.items():
+            cache.ops[name] = Operations(self.migration_context)
+
+        return cache.ops
 
     @property
     def op(self) -> Operations:
-        """Get the Alembic :class:`~alembic.operations.Operations`
-        context for the current app.
-
-        Accessing this property opens a database connection but can't
-        close it automatically. Make sure to call
-        ``migration_context.connection.close()`` when you're done.
+        """Get the Alembic :class:`~alembic.operations.Operations` context for
+        the current app. If multiple databases are configured, this is the
+        context for the ``"default"`` key.
         """
-        cache = self._get_cache()
-
-        if cache.op is None:
-            cache.op = Operations(self.migration_context)
-
-        return cache.op
+        return self.ops["default"]
 
     def run_migrations(
         self,
@@ -256,27 +387,48 @@ class Alembic:
         :param fn: Use this function to control what migrations are run.
         :param kwargs: Extra arguments passed to ``upgrade`` or
             ``downgrade`` in each revision.
+
+        .. versionchanged:: 3.1
+            Support multiple databases.
         """
-        db = current_app.extensions["sqlalchemy"]
-        env = self.environment_context
+        contexts = self.migration_contexts
+        multi = len(contexts) > 1
 
-        with db.engine.connect() as connection:
-            env.configure(
-                connection=connection,
-                target_metadata=db.metadata,
-                fn=fn,
-                **current_app.config["ALEMBIC_CONTEXT"],
-            )
+        # Enter all transactions before running any migrations. If any
+        # migrations fail, all will be rolled back. Otherwise, each will commit
+        # and if any commit fails, the remainder will be rolled back.
+        with ExitStack() as stack:
+            for context in contexts.values():
+                stack.enter_context(context.begin_transaction())
 
-            with env.begin_transaction():
-                env.run_migrations(**kwargs)
+            for name, context in contexts.items():
+                # env.configure would have set this, but it wasn't available
+                # when creating the contexts. There's no public way to set it.
+                context._migrations_fn = fn  # type: ignore[assignment]
+
+                if multi:
+                    kwargs["engine_name"] = name
+
+                # env.run_migrations would always use the last configured
+                # context. Do what it would with each context directly.
+                with Operations.context(context):
+                    context.run_migrations(**kwargs)
 
     def mkdir(self) -> None:
-        """Create the script directory and template."""
+        """Create the script directory and template.
+
+        Alembic's ``generic`` template is used if a single database is
+        configured. The ``multidb`` template if multiple databases are
+        configured.
+
+        .. versionchanged:: 3.1
+            Support multiple databases.
+        """
         script_dir = self.config.get_main_option("script_location")
         assert script_dir is not None
+        template = "multidb" if len(self.metadatas) > 1 else "generic"
         template_src = os.path.join(
-            self.config.get_template_directory(), "generic", "script.py.mako"
+            self.config.get_template_directory(), template, "script.py.mako"
         )
         template_dest = os.path.join(script_dir, "script.py.mako")
 
@@ -547,39 +699,63 @@ class Alembic:
         """Generate the :class:`~alembic.operations.ops.MigrationScript`
         object that would generate a new revision.
         """
-        db = current_app.extensions["sqlalchemy"]
-        return autogenerate.produce_migrations(self.migration_context, db.metadata)
+        scripts = []
+
+        for context in self.migration_contexts.values():
+            scripts.append(
+                autogenerate.produce_migrations(
+                    context, context.opts["target_metadata"]
+                )
+            )
+
+        script = scripts[0]
+
+        if len(scripts) > 1:
+            # Combine the ops for each database into one script.
+            script.upgrade_ops = [s.upgrade_ops for s in scripts]  # type: ignore[assignment]
+            script.downgrade_ops = [s.downgrade_ops for s in scripts]  # type: ignore[assignment]
+
+        return script
 
     def compare_metadata(self) -> list[tuple[t.Any, ...]]:
-        """Generate a list of operations that would be present in a new
-        revision.
+        """Describe the operations that would be present in a new revision.
+
+        This only supports a single database. For multiple databases, use the
+        following instead:
+
+        .. code-block:: python
+
+            for ops in alembic.produce_migrations().upgrade_ops_list:
+                name = ops.upgrade_token.removesuffix("_upgrades")
+                diff = ops.as_diffs()
         """
-        db = current_app.extensions["sqlalchemy"]
-        return autogenerate.compare_metadata(self.migration_context, db.metadata)  # type: ignore[no-any-return]
+        script = self.produce_migrations()
+        assert script.upgrade_ops is not None
+        return script.upgrade_ops.as_diffs()  # type: ignore[no-any-return]
 
 
 @dataclasses.dataclass
 class _Cache:
     """Cached Alembic objects for a given Flask app."""
 
+    engines: dict[str, sa.Engine] | None = None
+    metadatas: dict[str, sa.MetaData | list[sa.MetaData]] | None = None
     config: Config | None = None
     script: ScriptDirectory | None = None
     env: EnvironmentContext | None = None
-    context: MigrationContext | None = None
-    op: Operations | None = None
+    contexts: dict[str, MigrationContext] | None = None
+    ops: dict[str, Operations] | None = None
 
     def clear(self, exc: BaseException | None = None) -> None:
-        """Clear the cached Alembic objects.
+        """Clear the cached Alembic objects. Not all objects are cleared, only
+        those with connections that must be recreated on next access.
 
         This is called automatically during app context teardown.
-
-        :param exc: Exception from teardown handler.
         """
-        if self.context is not None and self.context.connection is not None:
-            self.context.connection.close()
+        if self.contexts is not None:
+            for context in self.contexts.values():
+                if context.connection is not None:
+                    context.connection.close()
 
-        self.config = None
-        self.script = None
-        self.env = None
-        self.context = None
-        self.op = None
+        self.contexts = None
+        self.ops = None

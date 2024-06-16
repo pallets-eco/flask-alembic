@@ -1,8 +1,12 @@
+from __future__ import annotations
+
+import collections.abc as c
 import os
 from pathlib import Path
 
 import pytest
 from flask import Flask
+from flask.ctx import AppContext
 from flask_sqlalchemy import SQLAlchemy
 
 from flask_alembic import Alembic
@@ -11,15 +15,21 @@ from flask_alembic import Alembic
 @pytest.fixture
 def app(request: pytest.FixtureRequest, tmp_path: Path) -> Flask:
     app = Flask(request.module.__name__, root_path=os.fspath(tmp_path))
-    app.config.update(
-        SQLALCHEMY_DATABASE_URI="sqlite://",
-        SQLALCHEMY_RECORD_QUERIES=False,
-    )
+    app.config["SQLALCHEMY_BINDS"] = {
+        "default": "sqlite://",
+        "other": "sqlite://",
+    }
     return app
 
 
 @pytest.fixture
-def db(app: Flask, request: pytest.FixtureRequest) -> SQLAlchemy:
+def app_ctx(app: Flask) -> c.Iterator[AppContext]:
+    with app.app_context() as ctx:
+        yield ctx
+
+
+@pytest.fixture
+def db(app: Flask) -> SQLAlchemy:
     return SQLAlchemy(app)
 
 

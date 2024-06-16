@@ -20,7 +20,6 @@ requires-python = ">=3.8"
 dependencies = [
     "alembic>=1.13",
     "flask>=3.0",
-    "flask-sqlalchemy>=3.1",
     "sqlalchemy>=2.0",
 ]
 
@@ -74,7 +73,6 @@ select = [
     "UP",  # pyupgrade
     "W",  # pycodestyle warning
 ]
-ignore-init-module-imports = true
 
 [tool.ruff.lint.isort]
 force-single-line = true
