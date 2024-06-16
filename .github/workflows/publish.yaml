@@ -25,7 +25,6 @@ jobs:
         run: cd dist && echo "hash=$(sha256sum * | base64 -w0)" >> $GITHUB_OUTPUT
       - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
-          name: dist
           path: ./dist
   provenance:
     needs: [build]
@@ -48,8 +47,9 @@ jobs:
       - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
       - name: create release
         run: >
-          gh release create --draft --repo ${{ github.repository }} ${{ github.ref_name }} *.intoto.jsonl/* dist/*
-
+          gh release create --draft --repo ${{ github.repository }}
+          ${{ github.ref_name }}
+          *.intoto.jsonl/* artifact/*
         env:
           GH_TOKEN: ${{ github.token }}
   publish-pypi:
@@ -58,10 +58,12 @@ jobs:
     # files in the draft release.
     environment:
       name: publish
-      url: https://pypi.org/project/Flask-Alembic/
+      url: https://pypi.org/project/Flask-Alembic/${{ github.ref_name }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
     steps:
       - uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
       - uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450 # v1.8.14
+        with:
+          packages-dir: artifact/

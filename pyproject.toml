@@ -1,19 +1,16 @@
 [project]
 name = "Flask-Alembic"
-version = "3.1.0"
-description = "Flask extension to integrate Alembic with Flask-SQLAlchemy."
+version = "3.1.0.dev"
+description = "Integrate Alembic with Flask."
 readme = "README.md"
 license = { file = "LICENSE.txt" }
-authors = [{name = "David Lord", email = "davidism@gmail.com"},]
+authors = [{ name = "David Lord" }]
+maintainers = [{ name = "Pallets", email = "contact@palletsprojects.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
-    "Environment :: Web Environment",
     "Framework :: Flask",
-    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Topic :: Database",
     "Typing :: Typed",
 ]
 requires-python = ">=3.9"
@@ -24,9 +21,11 @@ dependencies = [
 ]
 
 [project.urls]
+Donate = "https://palletsprojects.com/donate"
 Documentation = "https://flask-alembic.readthedocs.io"
-Changes = "https://flask-alembic.readthedocs.io/changes/"
-Source = "https://github.com/davidism/flask-alembic/"
+Changes = "https://flask-alembic.readthedocs.io/page/changes/"
+Source = "https://github.com/pallets-eco/flask-alembic/"
+Chat = "https://discord.gg/pallets"
 
 [build-system]
 requires = ["flit_core<4"]
@@ -56,11 +55,11 @@ strict = true
 [tool.pyright]
 pythonVersion = "3.9"
 include = ["src/flask_alembic", "tests"]
+typeCheckingMode = "basic"
 
 [tool.ruff]
 src = ["src"]
 fix = true
-unsafe-fixes = true
 show-fixes = true
 output-format = "full"
 
