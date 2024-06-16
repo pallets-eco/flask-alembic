@@ -15,8 +15,8 @@ If a value is a dict, the key will be equivalent to a section name in
 ``alembic.ini``, and the value will be the items in the section. This allows
 using Alembic's [post_write_hooks], for example.
 
-.. versionchanged:: 3.1
-    Treat dict values as sections.
+```{versionchanged} 3.1
+Treat dict values as sections.
 ```
 
 ```{data} ALEMBIC_CONTEXT
