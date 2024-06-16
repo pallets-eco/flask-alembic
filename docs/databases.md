@@ -1,5 +1,3 @@
-from sqlalchemy.orm import DeclarativeBase
-
 # Database Scenarios
 
 You can use Flask-Alembic with Flask-SQLAlchemy, Flask-SQLAlchemy-Lite, or plain
