@@ -1,21 +1,15 @@
 # Flask-Alembic
 
 Flask-Alembic is a [Flask][] extension that provides a configurable [Alembic][]
-migration environment around a [Flask-SQLAlchemy][] database.
+database migration environment. Supports [Flask-SQLAlchemy],
+[Flask-SQLAlchemy-Lite], or plain [SQLAlchemy]. Supports Alembic's single and
+multiple database templates.
 
 [Flask]: https://flask.palletsprojects.com
 [Alembic]: https://alembic.sqlalchemy.org
+[SQLAlchemy]: https://www.sqlalchemy.org
 [Flask-SQLAlchemy]: https://flask-sqlalchemy.palletsprojects.com
-
-## Installation
-
-Install from [PyPI][]:
-
-```text
-$ pip install Flask-Alembic
-```
-
-[PyPI]: https://pypi.org/project/Flask-Alembic
+[Flask-SQLAlchemy-Lite]: https://flask-sqlalchemy-lite.readthedocs.io
 
 ## Basic Usage
 
@@ -56,6 +50,8 @@ with app.app_context():
 
 - Configuration is taken from `Flask.config` instead of `alembic.ini` and
   `env.py`.
+- Engines and model/table metadata are taken from Flask-SQLAlchemy(-Lite) if
+  available, or can be configured manually.
 - The migrations are stored directly in the `migrations` folder instead of the
   `versions` folder.
 - Provides the migration environment instead of `env.py` and exposes Alembic's
@@ -64,9 +60,9 @@ with app.app_context():
   revision objects and don't print to stdout.
 - Allows operating Alembic at any API level while the app is running, through
   the exposed objects and functions.
-- Does not (currently) support offline migrations. I don't plan to add this but
-  am open to patches.
-- Does not (currently) support multiple databases. I plan on adding support for
-  Flask-SQLAlchemy binds and external bases eventually, or am open to patches.
 - Adds a system for managing independent migration branches and makes it easier
   to work with named branches.
+- Does not (currently) support offline migrations. I don't plan to work on this
+  but am open to patches.
+- Does not (currently) support async engines. I don't plan to work on this but
+  am open to patches.
