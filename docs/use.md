@@ -6,7 +6,7 @@
 ```
 
 First, set up your Flask application (or application factory) and the
-Flask-SQLAlchemy extension and models.
+Flask-SQLAlchemy(-Lite) extension and models.
 
 This extension follows the common pattern of Flask extension setup. Either
 immediately pass an app to {class}`.Alembic`, or call {meth}`~.Alembic.init_app`
@@ -18,6 +18,26 @@ from flask_alembic import Alembic
 alembic = Alembic()
 alembic.init_app(app)  # call in the app factory if you're using that pattern
 ```
+
+When using Flask-SQLAlchemy, `db.engines` and `db.metadata` are used
+automatically.
+
+When using Flask-SQLAlchemy-Lite, `db.engines` is used automatically, but you
+must pass the metadata you defined.
+
+```python
+from flask_alembic import Alembic
+from sqlalchemy.orm import DeclarativeBase
+
+class Model(DeclarativeBase):
+    pass
+
+alembic = Alembic(metadatas=Model.metadata)
+```
+
+You can use Flask-Alembic with Flask-SQLAlchemy, Flask-SQLAlchemy-Lite, or plain
+SQLAlchemy, and there is support for migrating multiple databases. See
+{doc}`databases` for details.
 
 When an app is registered, the migrations directory is created if it does not
 exist.
