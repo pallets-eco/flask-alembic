@@ -234,7 +234,11 @@ class Alembic:
             if key in ("script_location", "version_locations"):
                 continue
 
-            c.set_main_option(key, value)
+            if isinstance(value, dict):
+                for inner_key, inner_value in value.items():
+                    c.set_section_option(key, inner_key, inner_value)
+            else:
+                c.set_main_option(key, value)
 
         if len(self.metadatas) > 1:
             # Add the names used by the multidb template.

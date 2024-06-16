@@ -9,6 +9,8 @@ Unreleased
 - The constructor args `run_mkdir` and `command_name` are keyword only. {pr}`27`
 - Deprecate the `init_app` args `run_mkdir` and `command_name`. They can be
   passed to the constructor instead. {pr}`27`
+- Dict values in the `ALEMBIC` config are treated as Alembic config sections,
+  allowing use of Alembic features like `post_write_hooks`. {pr}`28`
 
 ## Version 3.0.1
 
