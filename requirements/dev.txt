@@ -139,7 +139,7 @@ mdurl==0.1.2
     # via
     #   -r docs.txt
     #   markdown-it-py
-mypy==1.10.0
+mypy==1.10.1
     # via -r typing.txt
 mypy-extensions==1.0.0
     # via
@@ -180,7 +180,7 @@ pygments==2.18.0
     #   sphinx
 pyproject-api==1.6.1
     # via tox
-pyright==1.1.367
+pyright==1.1.369
     # via -r typing.txt
 pytest==8.2.2
     # via
