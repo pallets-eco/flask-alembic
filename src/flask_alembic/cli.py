@@ -165,7 +165,7 @@ def merge(
     label: list[str] | None = None,
 ) -> None:
     """Generate a merge revision."""
-    alembic.merge(revisions, message, label)
+    alembic.merge(revisions or "heads", message, label)
 
 
 def _cmd_format(r: Script, verbose: bool) -> str:

@@ -2,6 +2,9 @@
 
 Unreleased
 
+- `flask db merge` merges all heads by default and does not require an argument.
+  {issue}`40`
+
 ## Version 3.1.0
 
 Released 2024-06-16
