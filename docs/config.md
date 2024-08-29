@@ -53,8 +53,8 @@ Run the [black] formatter.
 ALEMBIC = {
     "post_write_hooks": {
         "hooks": "black",
-        "pre-commit.type": "console_scripts",
-        "pre-commit.entrypoint": "black",
+        "black.type": "console_scripts",
+        "black.entrypoint": "black",
     }
 }
 ```
@@ -69,9 +69,9 @@ Run the [ruff] formatter.
 ALEMBIC = {
     "post_write_hooks": {
         "hooks": "ruff",
-        "pre-commit.type": "console_scripts",
-        "pre-commit.entrypoint": "ruff",
-        "pre-commit.options": "format REVISION_SCRIPT_FILENAME",
+        "ruff.type": "console_scripts",
+        "ruff.entrypoint": "ruff",
+        "ruff.options": "format REVISION_SCRIPT_FILENAME",
     }
 }
 ```
