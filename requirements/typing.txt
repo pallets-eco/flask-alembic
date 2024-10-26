@@ -52,5 +52,5 @@ typing-extensions==4.12.2
     # via
     #   mypy
     #   sqlalchemy
-werkzeug==3.0.4
+werkzeug==3.0.6
     # via flask
