@@ -42,5 +42,5 @@ sqlalchemy[asyncio]==2.0.32
     #   flask-sqlalchemy-lite
 typing-extensions==4.12.2
     # via sqlalchemy
-werkzeug==3.0.4
+werkzeug==3.0.6
     # via flask
