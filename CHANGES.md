@@ -2,6 +2,8 @@
 
 Unreleased
 
+-   Add `path_separator` to config to suppress Alembic warning. {issue}`48`
+
 ## Version 3.1.1
 
 Released 2024-08-29
