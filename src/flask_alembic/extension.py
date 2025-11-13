@@ -743,8 +743,8 @@ class Alembic:
 
         if len(scripts) > 1:
             # Combine the ops for each database into one script.
-            script.upgrade_ops = [s.upgrade_ops for s in scripts]  # type: ignore[assignment]
-            script.downgrade_ops = [s.downgrade_ops for s in scripts]  # type: ignore[assignment]
+            script.upgrade_ops = [s.upgrade_ops for s in scripts]  # type: ignore[misc]
+            script.downgrade_ops = [s.downgrade_ops for s in scripts]  # type: ignore[misc]
 
         return script
 

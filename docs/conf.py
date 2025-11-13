@@ -16,7 +16,6 @@ extensions = [
     "sphinxcontrib.log_cabinet",
 ]
 autodoc_member_order = "bysource"
-autodoc_default_options = {"members": None}
 autodoc_typehints = "description"
 autodoc_preserve_defaults = True
 extlinks = {
