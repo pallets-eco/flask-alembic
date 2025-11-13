@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import collections.abc as c
+import gc
 import os
 from pathlib import Path
 
@@ -13,13 +14,14 @@ from flask_alembic import Alembic
 
 
 @pytest.fixture
-def app(request: pytest.FixtureRequest, tmp_path: Path) -> Flask:
+def app(request: pytest.FixtureRequest, tmp_path: Path) -> c.Iterator[Flask]:
     app = Flask(request.module.__name__, root_path=os.fspath(tmp_path))
     app.config["SQLALCHEMY_ENGINES"] = {
         "default": "sqlite://",
         "other": "sqlite://",
     }
-    return app
+    yield app
+    gc.collect()
 
 
 @pytest.fixture
@@ -29,8 +31,13 @@ def app_ctx(app: Flask) -> c.Iterator[AppContext]:
 
 
 @pytest.fixture
-def db(app: Flask) -> SQLAlchemy:
-    return SQLAlchemy(app)
+def db(app: Flask) -> c.Iterator[SQLAlchemy]:
+    db = SQLAlchemy(app)
+    yield db
+
+    with app.app_context():
+        for engine in db.engines.values():
+            engine.dispose()
 
 
 @pytest.fixture
