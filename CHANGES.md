@@ -2,6 +2,7 @@
 
 Unreleased
 
+-   Drop support for Python 3.9.
 -   Add `path_separator` to config to suppress Alembic warning. {issue}`48`
 
 ## Version 3.1.1
