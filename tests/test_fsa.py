@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import collections.abc as c
 import os
 import typing as t
 from pathlib import Path
@@ -13,12 +14,17 @@ from flask_alembic import Alembic
 
 
 @pytest.fixture
-def db(app: Flask) -> SQLAlchemy:
+def db(app: Flask) -> c.Iterator[SQLAlchemy]:
     app.config["SQLALCHEMY_BINDS"] = {
         None: "sqlite://",
         "other": "sqlite://",
     }
-    return SQLAlchemy(app)
+    db = SQLAlchemy(app)
+    yield db
+
+    with app.app_context():
+        for engine in db.engines.values():
+            engine.dispose()
 
 
 @pytest.fixture
@@ -64,3 +70,5 @@ def test_override_engines(tmp_path: Path, app: Flask, db: SQLAlchemy) -> None:
     alembic = Alembic(app, engines=engine)
     assert alembic.migration_context.connection is not None
     assert alembic.migration_context.connection.engine.url.database == db_path
+    alembic.migration_context.connection.close()
+    engine.dispose()
