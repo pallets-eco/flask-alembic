@@ -148,6 +148,9 @@ class Alembic:
         app.extensions["alembic"] = self
 
         config = app.config.setdefault("ALEMBIC", {})
+        # path_separator isn't relevant in Flask-Alembic, but Alembic emits a
+        # warning if it's not set.
+        config.setdefault("path_separator", "os")
         config.setdefault("script_location", "migrations")
         config.setdefault("version_locations", [])
         ctx = app.config.setdefault("ALEMBIC_CONTEXT", {})

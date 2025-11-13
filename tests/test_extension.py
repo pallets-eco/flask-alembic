@@ -13,6 +13,7 @@ def test_default_config(app: Flask, alembic: Alembic) -> None:
     assert app.config["ALEMBIC"] == {
         "script_location": "migrations",
         "version_locations": [],
+        "path_separator": "os",
     }
     assert app.config["ALEMBIC_CONTEXT"] == {
         "compare_server_default": True,
