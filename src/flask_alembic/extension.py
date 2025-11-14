@@ -26,11 +26,8 @@ from alembic.script.revision import ResolutionError
 from flask import current_app
 from flask import Flask
 
-if t.TYPE_CHECKING:
-    import typing_extensions as te
-
-t_rev: te.TypeAlias = (
-    "str | Script | list[str] | list[Script] | tuple[str, ...] | tuple[Script, ...]"
+t_rev: t.TypeAlias = (
+    str | Script | list[str] | list[Script] | tuple[str, ...] | tuple[Script, ...]
 )
 
 
@@ -126,24 +123,13 @@ class Alembic:
         if app is not None:
             self.init_app(app)
 
-    def init_app(
-        self,
-        app: Flask,
-        *,
-        run_mkdir: None = None,
-        command_name: None = None,
-    ) -> None:
-        """Register this extension on an app. Will automatically set up
-        migration directory by default.
-
-        Keyword arguments on this method override those set during
-        :meth:`__init__` if not ``None``.
+    def init_app(self, app: Flask) -> None:
+        """Register this extension on an app.
 
         :param app: App to register.
 
-        .. versionchanged:: 3.1
-            ``run_mkdir`` and ``command_name`` are deprecated and will be
-            removed in Flask-Alembic 3.2. Use them in the constructor instead.
+        .. versionchanged:: 3.2
+            ``run_mkdir`` and ``command_name`` args are removed.
         """
         app.extensions["alembic"] = self
 
@@ -159,34 +145,14 @@ class Alembic:
         self._cache[app] = cache = _Cache()
         app.teardown_appcontext(cache.clear)
 
-        if run_mkdir is not None:
-            import warnings
-
-            warnings.warn(
-                "The 'run_mkdir' argument is deprecated and will be removed in"
-                " Flask-Alembic 3.2. Pass it to the constructor instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if run_mkdir or (run_mkdir is None and self.run_mkdir):
+        if self.run_mkdir:
             with app.app_context():
                 self.mkdir()
 
-        if command_name is not None:
-            import warnings
-
-            warnings.warn(
-                "The 'command_name' argument is deprecated and will be removed"
-                " in Flask-Alembic 3.2. Pass it to the constructor instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-
-        if command_name or (command_name is None and self.command_name):
+        if self.command_name:
             from .cli import cli
 
-            app.cli.add_command(cli, command_name or self.command_name)
+            app.cli.add_command(cli, self.command_name)
 
     def _get_cache(self) -> _Cache:
         """Get the cache of Alembic objects for the current app."""

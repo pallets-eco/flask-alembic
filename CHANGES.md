@@ -3,6 +3,8 @@
 Unreleased
 
 -   Drop support for Python 3.9.
+-   Remove previously deprecated code.
+    -   `init_app` args `run_mkdir` and `command_name` are removed.
 -   Add `path_separator` to config to suppress Alembic warning. {issue}`48`
 
 ## Version 3.1.1
