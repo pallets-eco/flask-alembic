@@ -40,14 +40,11 @@ def test_uses_engines(app: Flask) -> None:
 def test_engine_required(app: Flask) -> None:
     """Flask-SQLAlchemy-Lite must configure an engine."""
     del app.config["SQLALCHEMY_ENGINES"]
-    db = SQLAlchemy(app, require_default_engine=False)
+    SQLAlchemy(app, require_default_engine=False)
     alembic = Alembic(app, metadatas=Model.metadata)
 
     with pytest.raises(RuntimeError, match="engines configured"):
         assert alembic.migration_context
-
-    for engine in db.engines.values():
-        engine.dispose()
 
 
 @pytest.mark.usefixtures("app_ctx", "db")
@@ -69,5 +66,3 @@ def test_override_engines(tmp_path: Path, app: Flask) -> None:
     alembic = Alembic(app, metadatas=Model.metadata, engines=engine)
     assert alembic.migration_context.connection is not None
     assert alembic.migration_context.connection.engine.url.database == db_path
-    alembic.migration_context.connection.close()
-    engine.dispose()
