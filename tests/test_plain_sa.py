@@ -45,8 +45,6 @@ def test_valid_config(app: Flask) -> None:
         engines={"default": engine, "other": other_engine},
     )
     assert len(alembic.migration_contexts) == 2
-    engine.dispose()
-    other_engine.dispose()
 
 
 @pytest.mark.usefixtures("app_ctx")
@@ -61,5 +59,3 @@ def test_missing_engine(app: Flask) -> None:
 
     with pytest.raises(RuntimeError, match="Missing engine config"):
         assert alembic.migration_context
-
-    engine.dispose()

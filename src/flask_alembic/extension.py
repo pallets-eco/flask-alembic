@@ -752,7 +752,7 @@ class _Cache:
         if self.contexts is not None:
             for context in self.contexts.values():
                 if context.connection is not None:
-                    context.connection.close()
+                    context.connection.invalidate()
 
         self.contexts = None
         self.ops = None

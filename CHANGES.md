@@ -5,6 +5,9 @@ Unreleased
 -   Drop support for Python 3.9.
 -   Remove previously deprecated code.
     -   `init_app` args `run_mkdir` and `command_name` are removed.
+-   Call `invalidate` instead of `close` on the connection used by the migration
+    context. This seems to fix resource warnings from sqlite3 during tests.
+    {issue}`47`
 -   Add `path_separator` to config to suppress Alembic warning. {issue}`48`
 
 ## Version 3.1.1

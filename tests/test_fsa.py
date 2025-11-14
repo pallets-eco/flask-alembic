@@ -22,10 +22,6 @@ def db(app: Flask) -> c.Iterator[SQLAlchemy]:
     db = SQLAlchemy(app)
     yield db
 
-    with app.app_context():
-        for engine in db.engines.values():
-            engine.dispose()
-
 
 @pytest.fixture
 def Book(db: SQLAlchemy) -> type[t.Any]:
@@ -70,5 +66,3 @@ def test_override_engines(tmp_path: Path, app: Flask, db: SQLAlchemy) -> None:
     alembic = Alembic(app, engines=engine)
     assert alembic.migration_context.connection is not None
     assert alembic.migration_context.connection.engine.url.database == db_path
-    alembic.migration_context.connection.close()
-    engine.dispose()
