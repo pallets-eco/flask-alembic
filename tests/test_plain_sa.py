@@ -1,15 +1,12 @@
 from __future__ import annotations
 
 import pytest
+from app import Model
 from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_alembic import Alembic
-
-
-class Model(DeclarativeBase):
-    pass
 
 
 class Other(DeclarativeBase):
