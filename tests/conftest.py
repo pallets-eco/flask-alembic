@@ -6,9 +6,10 @@ import shutil
 from pathlib import Path
 
 import pytest
-from app import Model
+import sqlalchemy as sa
 from flask import Flask
 from flask.ctx import AppContext
+from flask.testing import FlaskCliRunner
 from flask_sqlalchemy_lite import SQLAlchemy
 
 from flask_alembic import Alembic
@@ -36,6 +37,29 @@ def db(app: Flask) -> c.Iterator[SQLAlchemy]:
 
 
 @pytest.fixture
-def alembic(app: Flask, db: SQLAlchemy, tmp_path: Path) -> Alembic:
+def metadata() -> sa.MetaData:
+    return sa.MetaData()
+
+
+@pytest.fixture(autouse=True)
+def todo_table(metadata: sa.MetaData) -> sa.Table:
+    return sa.Table(
+        "todo",
+        metadata,
+        sa.Column("id", sa.Integer, primary_key=True),
+        sa.Column("text", sa.String),
+    )
+
+
+@pytest.fixture
+def alembic(
+    app: Flask, db: SQLAlchemy, metadata: sa.MetaData, tmp_path: Path
+) -> Alembic:
     shutil.copytree(Path(__file__).parent / "migrations", tmp_path / "migrations")
-    return Alembic(app, metadatas=Model.metadata)
+    return Alembic(app, metadatas=metadata)
+
+
+@pytest.fixture
+def runner(app: Flask) -> c.Iterator[FlaskCliRunner]:
+    """Create a test CLI runner."""
+    yield app.test_cli_runner()

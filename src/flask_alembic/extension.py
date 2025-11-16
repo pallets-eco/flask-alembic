@@ -724,6 +724,23 @@ class Alembic:
 
         return script
 
+    def needs_revision(self) -> bool:
+        """Check if any changes between the database and models are detected.
+
+        :return: True if changes are detected.
+
+        .. versionadded:: 3.2
+        """
+        script = self.produce_migrations()
+
+        if isinstance(script.upgrade_ops, list):
+            # Multiple databases
+            return any(not ops.is_empty() for ops in script.upgrade_ops)
+
+        # Single database
+        assert script.upgrade_ops is not None
+        return not script.upgrade_ops.is_empty()
+
     def compare_metadata(self) -> list[tuple[t.Any, ...]]:
         """Describe the operations that would be present in a new revision.
 

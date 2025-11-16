@@ -89,6 +89,17 @@ def show(alembic: Alembic, revisions: list[str]) -> None:
 
 @cli.command()
 @click.pass_obj
+def check(alembic: Alembic) -> None:
+    """Check if any changes between the database and models are detected."""
+    if alembic.needs_revision():
+        click.echo("Changes detected.")
+        raise click.exceptions.Exit(1)
+    else:
+        click.echo("No changes detected.")
+
+
+@cli.command()
+@click.pass_obj
 @click.argument("target", default="heads")
 def stamp(alembic: Alembic, target: str = "heads") -> None:
     """Set the current revision without running migrations."""
