@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import collections.abc as c
 import os
+import shutil
 from pathlib import Path
 
 import pytest
+from app import Model
 from flask import Flask
 from flask.ctx import AppContext
 from flask_sqlalchemy_lite import SQLAlchemy
@@ -34,5 +36,6 @@ def db(app: Flask) -> c.Iterator[SQLAlchemy]:
 
 
 @pytest.fixture
-def alembic(app: Flask, db: SQLAlchemy) -> Alembic:
-    return Alembic(app)
+def alembic(app: Flask, db: SQLAlchemy, tmp_path: Path) -> Alembic:
+    shutil.copytree(Path(__file__).parent / "migrations", tmp_path / "migrations")
+    return Alembic(app, metadatas=Model.metadata)

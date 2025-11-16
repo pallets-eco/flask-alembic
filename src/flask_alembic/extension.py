@@ -480,9 +480,19 @@ class Alembic:
                 return [r.revision for r in self.current()]
             elif handle_int:
                 try:
-                    return [f"{int(rev):+d}"]
+                    int_val = int(rev)
                 except ValueError:
                     return [rev]
+
+                # Check if this string is actually a revision ID before
+                # treating it as a relative count.
+                try:
+                    self.script_directory.revision_map.get_revisions(rev)
+                    # If we got here, the string is a valid revision ID
+                    return [rev]
+                except ResolutionError:
+                    # Not a valid revision ID, treat as relative count
+                    return [f"{int_val:+d}"]
             else:
                 return [rev]
 

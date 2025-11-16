@@ -4,16 +4,13 @@ import os
 from pathlib import Path
 
 import pytest
+from app import Model
 from flask import Flask
 from flask_sqlalchemy_lite import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_alembic import Alembic
-
-
-class Model(DeclarativeBase):
-    pass
 
 
 class Other(DeclarativeBase):
