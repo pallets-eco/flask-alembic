@@ -11,6 +11,8 @@ Unreleased
 -   Add `path_separator` to config to suppress Alembic warning. {issue}`48`
 -   `upgrade` and `downgrade` check if the target is a revision before treating
     it as a relative count. {issue}`45`
+-   Implement `check` CLI command and corresponding `needs_revision` method.
+    {issue}`33`
 
 ## Version 3.1.1
 
