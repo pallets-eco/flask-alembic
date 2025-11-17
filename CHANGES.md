@@ -13,6 +13,8 @@ Unreleased
     it as a relative count. {issue}`45`
 -   Implement `check` CLI command and corresponding `needs_revision` method.
     {issue}`33`
+-   Implement `current --check-heads` CLI command and corresponding
+    `needs_upgrade` method.
 
 ## Version 3.1.1
 

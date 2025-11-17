@@ -448,6 +448,16 @@ class Alembic:
             self.migration_context.get_current_heads()
         )
 
+    def needs_upgrade(self) -> bool:
+        """Check whether the current revisions are the head revisions.
+
+        :return: ``True`` if the database is not at all head revisions,
+            ``False`` otherwise.
+        """
+        current_revs = {r.revision for r in self.current()}
+        head_revs = {r.revision for r in self.heads()}
+        return current_revs != head_revs
+
     def heads(self, resolve_dependencies: bool = False) -> tuple[Script, ...]:
         """Get the list of revisions that have no child revisions.
 

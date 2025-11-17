@@ -26,9 +26,24 @@ def mkdir(alembic: Alembic) -> None:
 
 @cli.command()
 @click.pass_obj
+@click.pass_context
+@click.option(
+    "--check-heads",
+    is_flag=True,
+    help="Check if all head revisions are applied.",
+)
 @click.option("-v", "--verbose", is_flag=True)
-def current(alembic: Alembic, verbose: bool = False) -> None:
+def current(
+    ctx: click.Context,
+    alembic: Alembic,
+    check_heads: bool = False,
+    verbose: bool = False,
+) -> None:
     """Show the list of current revisions."""
+    if check_heads and alembic.needs_upgrade():
+        click.echo("Database is not on all head revisions")
+        ctx.exit(1)
+
     for r in alembic.current():
         if r is None:
             click.echo("None")
@@ -89,11 +104,12 @@ def show(alembic: Alembic, revisions: list[str]) -> None:
 
 @cli.command()
 @click.pass_obj
-def check(alembic: Alembic) -> None:
+@click.pass_context
+def check(ctx: click.Context, alembic: Alembic) -> None:
     """Check if any changes between the database and models are detected."""
     if alembic.needs_revision():
         click.echo("Changes detected.")
-        raise click.exceptions.Exit(1)
+        ctx.exit(1)
     else:
         click.echo("No changes detected.")
 
