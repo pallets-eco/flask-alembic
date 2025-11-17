@@ -21,6 +21,10 @@ $ pip install Flask-Alembic
 
 [PyPI]: https://pypi.org/project/Flask-Alembic
 
+## Source
+
+The project is hosted on GitHub: <https://github.com/pallets-eco/flask-alembic>.
+
 ## Differences from Alembic
 
 - Configuration is taken from `Flask.config` instead of `alembic.ini` and
