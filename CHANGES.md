@@ -1,6 +1,6 @@
 ## Version 3.2.0
 
-Unreleased
+Released 2025-11-16
 
 -   Drop support for Python 3.9.
 -   Remove previously deprecated code.
