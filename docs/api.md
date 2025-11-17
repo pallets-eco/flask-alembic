@@ -7,4 +7,5 @@ or private and may change at any time.
 ```{eval-rst}
 .. module:: flask_alembic
 .. autoclass:: Alembic
+    :members:
 ```
