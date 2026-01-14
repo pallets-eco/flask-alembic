@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from click.testing import Result
@@ -40,3 +41,21 @@ def test_no_cli(app: Flask) -> None:
     runner = app.test_cli_runner()
     result: Result = runner.invoke(args=["db", "--help"])
     assert result.exit_code == 2
+
+
+def test_version_locations(app: Flask) -> None:
+    """Multiple locations are handled without Alembic warning about deprecated
+    path separator behavior.
+    """
+    app.config["ALEMBIC"] = {
+        "script_location": "migrations",
+        "version_locations": ["migrations/versions", "versions"],
+    }
+    alembic = Alembic(app)
+
+    with app.app_context():
+        assert alembic.script_directory.version_locations == [
+            os.path.join(app.root_path, "migrations"),
+            os.path.join(app.root_path, "migrations/versions"),
+            os.path.join(app.root_path, "versions"),
+        ]
