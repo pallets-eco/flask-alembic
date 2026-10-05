@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 import dataclasses
+import datetime as dt
 import logging
 import os
 import shutil
 import sys
 import typing as t
 from contextlib import ExitStack
-from datetime import datetime
-from datetime import timezone
 from weakref import WeakKeyDictionary
 
 import sqlalchemy as sa
@@ -168,7 +167,7 @@ class Alembic:
         .. versionchanged:: 3.0
             Uses the current UTC timestamp instead of a UUID.
         """
-        return str(int(datetime.now(timezone.utc).timestamp()))
+        return str(int(dt.datetime.now(dt.UTC).timestamp()))
 
     @property
     def config(self) -> Config:
