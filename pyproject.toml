@@ -1,6 +1,6 @@
 [project]
 name = "Flask-Alembic"
-version = "3.2.0"
+version = "3.2.1.dev"
 description = "Integrate Alembic with Flask."
 readme = "README.md"
 license = "MIT"
@@ -61,7 +61,7 @@ typing = [
 ]
 
 [build-system]
-requires = ["flit-core>=3.11,<4"]
+requires = ["flit_core>=3.11,<5"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.module]
@@ -95,11 +95,6 @@ show_error_codes = true
 pretty = true
 strict = true
 
-[tool.pyright]
-pythonVersion = "3.10"
-include = ["src"]
-typeCheckingMode = "basic"
-
 [tool.ruff]
 src = ["src"]
 fix = true
@@ -120,14 +115,9 @@ select = [
 force-single-line = true
 order-by-type = false
 
-[tool.gha-update]
-tag-only = [
-    "slsa-framework/slsa-github-generator",
-]
-
 [tool.tox]
 env_list = [
-    "py3.14", "py3.13", "py3.12", "py3.11", "py3.10",
+    "py3.15", "py3.14", "py3.13", "py3.12", "py3.11", "py3.10",
     "tests-min",
     "style",
     "typing",
@@ -170,7 +160,6 @@ description = "run static type checkers"
 dependency_groups = ["tests", "typing"]
 commands = [
     ["mypy"],
-    ["pyright"],
     ["pyright", "--verifytypes", "flask_alembic", "--ignoreexternal"],
 ]
 

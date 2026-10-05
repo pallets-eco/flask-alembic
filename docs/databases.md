@@ -21,8 +21,10 @@ the metadata you define must be passed to `Alembic`.
 from flask_alembic import Alembic
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Model(DeclarativeBase):
     pass
+
 
 alembic = Alembic(metadatas=Model.metadata)
 ```
@@ -40,8 +42,10 @@ from sqlalchemy.orm import DeclarativeBase
 
 engine = create_engine("sqlite:///default.sqlite")
 
+
 class Model(DeclarativeBase):
     pass
+
 
 alembic = Alembic(metadatas=Model.metadata, engines=engine)
 ```
@@ -64,11 +68,14 @@ from flask_alembic import Alembic
 from flask_sqlalchemy_lite import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 
+
 class DefaultBase(DeclarativeBase):
     pass
 
+
 class AuthBase(DeclarativeBase):
     pass
+
 
 db = SQLAlchemy()
 alembic = Alembic(
@@ -107,11 +114,14 @@ directly to `metadatas`, otherwise any value in the dict can be a list.
 from flask_alembic import Alembic
 from sqlalchemy.orm import DeclarativeBase
 
+
 class DefaultBase(DeclarativeBase):
     pass
 
+
 class AuthBase(DeclarativeBase):
     pass
+
 
 alembic = Alembic(metadatas=[DefaultBase.metadata, AuthBase.metadata])
 ```

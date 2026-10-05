@@ -12,6 +12,10 @@ from sqlalchemy import create_engine
 
 from flask_alembic import Alembic
 
+pytestmark = [
+    pytest.mark.filterwarnings("ignore:Attribute name 'metadata'"),
+]
+
 
 @pytest.fixture
 def db(app: Flask) -> c.Iterator[SQLAlchemy]:

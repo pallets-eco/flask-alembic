@@ -29,7 +29,7 @@ start using Flask-Alembic:
 ```python
 from flask_alembic import Alembic
 
-# Intialize the extension
+# Initialize the extension
 alembic = Alembic()
 alembic.init_app(app)
 ```
@@ -47,7 +47,7 @@ You can also access Alembic's functionality from Python:
 ```python
 with app.app_context():
     # Auto-generate a migration
-    alembic.revision('making changes')
+    alembic.revision("making changes")
 
     # Upgrade the database
     alembic.upgrade()

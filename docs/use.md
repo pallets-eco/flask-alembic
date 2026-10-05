@@ -29,8 +29,10 @@ must pass the metadata you defined.
 from flask_alembic import Alembic
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Model(DeclarativeBase):
     pass
+
 
 alembic = Alembic(metadatas=Model.metadata)
 ```
