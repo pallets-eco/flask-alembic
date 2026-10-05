@@ -3,6 +3,7 @@
 Unreleased
 
 -   Drop support for Python 3.10.
+-   Require Alembic >= 1.16.
 
 ## Version 3.2.0
 
