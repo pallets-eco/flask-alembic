@@ -1,11 +1,11 @@
 ## Version 3.3.0
 
-Unreleased
+Released 2026-10-05
 
 -   Drop support for Python 3.10.
 -   Require Alembic >= 1.16.
 -   Address warning from Alembic about deprecated path separator behavior.
-    :issue:`59`
+    {issue}`59`
 
 ## Version 3.2.0
 

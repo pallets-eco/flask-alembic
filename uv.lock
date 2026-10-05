@@ -516,7 +516,7 @@ async = [
 
 [[package]]
 name = "flask-alembic"
-version = "3.3.0.dev0"
+version = "3.3.0"
 source = { editable = "." }
 default-groups = ["dev", "pre-commit", "tests", "typing"]
 dependencies = [
