@@ -13,7 +13,7 @@ classifiers = [
     "Programming Language :: Python",
     "Typing :: Typed",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.13.0",
     "flask>=3.0.0",
@@ -89,7 +89,7 @@ exclude_also = [
 ]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 files = ["src"]
 show_error_codes = true
 pretty = true
@@ -117,7 +117,7 @@ order-by-type = false
 
 [tool.tox]
 env_list = [
-    "py3.15", "py3.14", "py3.13", "py3.12", "py3.11", "py3.10",
+    "py3.15", "py3.14", "py3.13", "py3.12", "py3.11",
     "tests-min",
     "style",
     "typing",

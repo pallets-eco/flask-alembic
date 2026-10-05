@@ -2,6 +2,8 @@
 
 Unreleased
 
+-   Drop support for Python 3.10.
+
 ## Version 3.2.0
 
 Released 2025-11-16

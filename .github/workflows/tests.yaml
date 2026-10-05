@@ -22,7 +22,6 @@ jobs:
           - {python: '3.13'}
           - {python: '3.12'}
           - {python: '3.11'}
-          - {python: '3.10'}
           - {name: Minimum Versions, python: '3.14', tox: tests-min}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
