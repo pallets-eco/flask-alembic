@@ -196,10 +196,14 @@ class Alembic:
             version_locations.append(version_location)
 
         c.set_main_option("script_location", script_location)
-        c.set_main_option("version_locations", ",".join(version_locations))
+        c.set_main_option(
+            "path_separator", current_app.config["ALEMBIC"]["path_separator"]
+        )
+        path_sep = c._get_file_separator_char("path_separator") or os.pathsep
+        c.set_main_option("version_locations", path_sep.join(version_locations))
 
         for key, value in current_app.config["ALEMBIC"].items():
-            if key in ("script_location", "version_locations"):
+            if key in {"script_location", "path_separator", "version_locations"}:
                 continue
 
             if isinstance(value, dict):
