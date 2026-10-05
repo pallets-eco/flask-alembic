@@ -561,7 +561,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alembic", specifier = ">=1.13.0" },
+    { name = "alembic", specifier = ">=1.16.0" },
     { name = "flask", specifier = ">=3.0.0" },
     { name = "sqlalchemy", specifier = ">=2.0.31" },
 ]
