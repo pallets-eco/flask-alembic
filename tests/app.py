@@ -36,7 +36,9 @@ def make_migrations():
     inc = count()
     alembic.rev_id = lambda: str(1_000 + next(inc))
 
-    shutil.rmtree(alembic.config.get_main_option("script_location"))
+    script_location = alembic.config.get_alembic_option("script_location")
+    assert isinstance(script_location, str)
+    shutil.rmtree(script_location)
     alembic.mkdir()
 
     sa.Table(

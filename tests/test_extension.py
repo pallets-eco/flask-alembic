@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from alembic.config import Config
 from click.testing import Result
 from flask import Flask
 
@@ -59,3 +60,17 @@ def test_version_locations(app: Flask) -> None:
             os.path.join(app.root_path, "migrations/versions"),
             os.path.join(app.root_path, "versions"),
         ]
+
+
+def test_toml_config(app: Flask, tmp_path: Path) -> None:
+    alembic = Alembic(app, run_mkdir=False)
+    toml_file = tmp_path / "pyproject.toml"
+    script_location = tmp_path / "migrations"
+    toml_file.write_text(f'[tool.alembic]\nscript_location = "{script_location}"\n')
+    with app.app_context():
+        alembic._cache[app].config = Config(toml_file=toml_file)
+        assert alembic.config.get_alembic_option("script_location") == str(
+            script_location
+        )
+        alembic.mkdir()
+        assert script_location.is_dir()

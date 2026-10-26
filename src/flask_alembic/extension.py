@@ -424,8 +424,8 @@ class Alembic:
         .. versionchanged:: 3.1
             Support multiple databases.
         """
-        script_dir = self.config.get_main_option("script_location")
-        assert script_dir is not None
+        script_dir = self.config.get_alembic_option("script_location")
+        assert isinstance(script_dir, str)
         template = "multidb" if len(self.metadatas) > 1 else "generic"
         template_src = os.path.join(
             self.config.get_template_directory(), template, "script.py.mako"
@@ -682,7 +682,7 @@ class Alembic:
             return []
 
         if not empty or util.asbool(
-            self.config.get_main_option("revision_environment")
+            self.config.get_alembic_option("revision_environment")
         ):
             self.run_migrations(do_revision)
 

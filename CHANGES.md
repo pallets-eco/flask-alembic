@@ -1,3 +1,8 @@
+## Unreleased
+
+-   Use `get_alembic_option` instead of `get_main_option` to support Alembic TOML
+    config. {issue}`63`
+
 ## Version 3.3.0
 
 Released 2026-10-05
